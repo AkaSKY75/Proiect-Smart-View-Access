@@ -3,6 +3,4 @@ import 'package:stacked_services/stacked_services.dart';
 
 GetIt locator = GetIt.instance;
 
-void setupLocator() {
-  locator.registerLazySingleton(() => NavigationService());
-}
+void setupLocator() {}

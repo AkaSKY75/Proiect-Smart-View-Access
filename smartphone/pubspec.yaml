@@ -37,7 +37,7 @@ dev_dependencies:
   cloud_firestore: ^1.0.1
   build_runner: ^1.10.9
   stacked_services: ^0.7.3
-  auto_route: ^0.6.9
+  auto_route: ^1.0.2
   stacked: ^1.9.7
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
