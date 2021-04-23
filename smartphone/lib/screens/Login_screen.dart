@@ -16,6 +16,13 @@ class _LoginState extends State<Login> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Spacer(),
+          Image(
+            width: 300,
+            height: 300,
+            alignment: Alignment.bottomRight,
+            image: NetworkImage(
+                'https://cdn.discordapp.com/attachments/814426440308752449/814460660569735199/1.png'),
+          ),
           Container(
             width: 400,
             decoration: BoxDecoration(color: Colors.grey[100]),
