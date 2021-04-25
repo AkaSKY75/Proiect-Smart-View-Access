@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:smartphone/screens/Login_screen.dart';
-import 'package:stacked_services/stacked_services.dart';
+import 'package:smartphone/screens/Profile_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'locator.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-import 'dart:async';
 
-void main() {
-  //await Firebase.initializeApp();
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   setupLocator();
   runApp(MyApp());
 }
@@ -21,9 +20,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Login(),
-      navigatorKey: StackedService.navigatorKey,
       debugShowCheckedModeBanner: false,
+      initialRoute: '/',
+      routes: {
+        // When navigating to the "/" route, build the FirstScreen widget.
+        '/': (context) => Login(),
+        // When navigating to the "/second" route, build the SecondScreen widget.
+        '/profile': (context) => ProfileScreen(),
+      },
     );
   }
 }
