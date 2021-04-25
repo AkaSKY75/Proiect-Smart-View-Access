@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:smartphone/view_models/profile_viewModel.dart';
 import 'package:stacked/stacked.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   @override
+  ProfileScreenState createState() => ProfileScreenState();
+}
+
+class ProfileScreenState extends State<ProfileScreen> {
+  bool isPressed = false;
   Widget build(BuildContext context) {
     return ViewModelBuilder<ProfileView>.reactive(
       viewModelBuilder: () => ProfileView(),
@@ -58,85 +64,134 @@ class ProfileScreen extends StatelessWidget {
                 SizedBox(
                   height: 20,
                 ),
-                Container(
-                  padding: EdgeInsets.only(right: 310),
-                  child: Text("Nume: " + model.nume),
-                ),
+                isPressed == true
+                    ? QrImage(
+                        data: model.cnp.toString(),
+                      )
+                    : Column(children: [
+                        Container(
+                          padding: EdgeInsets.only(right: 310),
+                          child: Text("Nume: " + model.nume),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(right: 305),
+                          child: Text("CNP: " + model.cnp.toString()),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(right: 260),
+                          child: Text("Nr. Masina: " + model.nr_inmatriculare),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(right: 300),
+                          child: Text("Departament: " + model.departament),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(right: 170),
+                          child: Text("Repartizare loc: " +
+                              " Etaj " +
+                              model.etaj.toString() +
+                              ", " +
+                              "Birou " +
+                              model.birou.toString() +
+                              ", " +
+                              "Loc" +
+                              model.loc.toString() +
+                              " "),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(right: 200),
+                          child: Container(
+                            width: 200,
+                            height: 30,
+                            decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                borderRadius: BorderRadius.zero),
+                            child: MaterialButton(
+                              onPressed: () {},
+                              child: Text("Schimbare parola"),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 100,
+                        ),
+                        Container(
+                          width: 200,
+                          height: 100,
+                          decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.zero),
+                          child: MaterialButton(
+                            onPressed: () {
+                              setState(() {
+                                isPressed = true;
+                              });
+                            },
+                            child: Text(
+                              "Generare cod QR",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20),
+                            ),
+                          ),
+                        ),
+                      ]),
                 SizedBox(
                   height: 20,
                 ),
-                Container(
-                  padding: EdgeInsets.only(right: 305),
-                  child: Text("CNP: " + model.cnp.toString()),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  padding: EdgeInsets.only(right: 260),
-                  child: Text("Nr. Masina: " + model.nr_inmatriculare),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  padding: EdgeInsets.only(right: 300),
-                  child: Text("Departament: " + model.departament),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  padding: EdgeInsets.only(right: 170),
-                  child: Text("Repartizare loc: " +
-                      " Etaj " +
-                      model.etaj.toString() +
-                      ", " +
-                      "Birou " +
-                      model.birou.toString() +
-                      ", " +
-                      "Loc" +
-                      model.loc.toString() +
-                      " "),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Padding(
-                  padding: EdgeInsets.only(right: 200),
-                  child: Container(
-                    width: 200,
-                    height: 30,
-                    decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.zero),
-                    child: MaterialButton(
-                      onPressed: () {},
-                      child: Text("Schimbare parola"),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 100,
-                ),
-                Container(
-                  width: 200,
-                  height: 100,
-                  decoration: BoxDecoration(
-                      color: Colors.grey[300], borderRadius: BorderRadius.zero),
-                  child: MaterialButton(
-                    onPressed: () {},
-                    child: Text(
-                      "Generare cod QR",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                    ),
-                  ),
-                ),
+                isPressed == true
+                    ? Container(
+                        width: 300,
+                        height: 50,
+                        decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.zero),
+                        child: MaterialButton(
+                          onPressed: () {
+                            setState(() {
+                              isPressed = false;
+                            });
+                          },
+                          child: Text(
+                            "Inapoi",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20),
+                          ),
+                        ),
+                      )
+                    : SizedBox(
+                        height: 1,
+                      ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Future<Widget> showQR(String cnp) async {
+    return Container(
+      width: 200,
+      height: 200,
+      decoration: BoxDecoration(
+          color: Colors.grey[300], borderRadius: BorderRadius.zero),
+      child: QrImage(
+        data: cnp,
       ),
     );
   }
