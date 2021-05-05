@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:smartphone/view_models/profile_viewModel.dart';
 import 'package:stacked/stacked.dart';
@@ -9,6 +10,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class ProfileScreenState extends State<ProfileScreen> {
+  String formattedDate;
   bool isPressed = false;
   Widget build(BuildContext context) {
     return ViewModelBuilder<ProfileView>.reactive(
@@ -66,7 +68,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                 ),
                 isPressed == true
                     ? QrImage(
-                        data: model.cnp.toString(),
+                        data: model.cnp.toString() + formattedDate,
                       )
                     : Column(children: [
                         Container(
@@ -140,6 +142,12 @@ class ProfileScreenState extends State<ProfileScreen> {
                             onPressed: () {
                               setState(() {
                                 isPressed = true;
+                                var now = new DateTime.now();
+                                var formatter =
+                                    new DateFormat('yyyyMMddhhmmss');
+                                formattedDate = formatter.format(now);
+                                print(
+                                    "DATAAA: ${model.cnp.toString()}$formattedDate");
                               });
                             },
                             child: Text(
@@ -164,6 +172,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                           onPressed: () {
                             setState(() {
                               isPressed = false;
+                              formattedDate = null;
                             });
                           },
                           child: Text(
