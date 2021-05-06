@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -12,6 +14,7 @@ class ProfileScreen extends StatefulWidget {
 class ProfileScreenState extends State<ProfileScreen> {
   String formattedDate;
   bool isPressed = false;
+  File image;
   Widget build(BuildContext context) {
     return ViewModelBuilder<ProfileView>.reactive(
       viewModelBuilder: () => ProfileView(),
@@ -42,11 +45,38 @@ class ProfileScreenState extends State<ProfileScreen> {
                     ),
                     Container(
                       color: Colors.grey[300],
-                      child: Icon(
-                        Icons.person,
-                        size: 100,
-                        color: Colors.grey[500],
-                      ),
+                      child: model.imagePicked == null
+                          ? IconButton(
+                              onPressed: () async {
+                                showAlertDialogOwn(() async {
+                                  image = await model.takeImageCamera();
+                                  await model.uploadAvatar();
+                                }, () async {
+                                  image = await model.takeImageGallery();
+                                  await model.uploadAvatar();
+                                }, context);
+                              },
+                              icon: Icon(Icons.person),
+                              iconSize: 100,
+                              color: Colors.grey[500],
+                            )
+                          : InkWell(
+                              onTap: () async {
+                                showAlertDialogOwn(() async {
+                                  image = await model.takeImageCamera();
+                                  await model.uploadAvatar();
+                                }, () async {
+                                  image = await model.takeImageGallery();
+                                  await model.uploadAvatar();
+                                }, context);
+                              },
+                              child: Image.file(
+                                model.imagePicked,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.fill,
+                              ),
+                            ),
                     ),
                     SizedBox(
                       width: 20,
@@ -203,5 +233,71 @@ class ProfileScreenState extends State<ProfileScreen> {
         data: cnp,
       ),
     );
+  }
+
+  Future<void> showAlertDialogOwn(
+      Function cameraImage, Function galleryImage, BuildContext context) {
+    return showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10), topRight: Radius.circular(10)),
+            ),
+            height: 150,
+            width: 150,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 20,
+                ),
+                Container(
+                  width: 300,
+                  height: 50,
+                  child: InkWell(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.camera),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Text("Poza cu camera"),
+                      ],
+                    ),
+                    onTap: () async {
+                      await cameraImage();
+                    },
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Container(
+                  width: 300,
+                  height: 50,
+                  child: InkWell(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.image),
+                        SizedBox(
+                          width: 20,
+                        ),
+                        Text("Poza din galerie"),
+                      ],
+                    ),
+                    onTap: () async {
+                      await galleryImage();
+                    },
+                  ),
+                )
+              ],
+            ),
+          );
+        });
   }
 }

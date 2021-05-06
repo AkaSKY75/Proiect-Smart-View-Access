@@ -11,6 +11,8 @@ class AngajatDataModel {
   String nume;
   String parola;
   String prenume;
+  String imagePath;
+  String uid;
   AngajatDataModel(
       {this.avatar,
       this.birou,
@@ -23,7 +25,9 @@ class AngajatDataModel {
       this.numar_inmatriculare,
       this.nume,
       this.parola,
-      this.prenume});
+      this.prenume,
+      this.imagePath,
+      this.uid});
   static AngajatDataModel toMap(avatar, birou, cnp, departament, email,
       email_firma, etaj, loc, numar_inmatriculare, nume, parola, prenume) {
     return AngajatDataModel(
@@ -41,7 +45,8 @@ class AngajatDataModel {
         prenume: prenume);
   }
 
-  static AngajatDataModel fromMap(Map<String, dynamic> map) {
+  static AngajatDataModel fromMap(
+      Map<String, dynamic> map, String downloadUrl, String uid) {
     if (map == null) {
       print("NOTGOOD");
       return null;
@@ -58,7 +63,9 @@ class AngajatDataModel {
         numar_inmatriculare: map["numar_inmatriculare"],
         nume: map["nume"],
         parola: map["parola"],
-        prenume: map["prenume"]);
+        prenume: map["prenume"],
+        imagePath: downloadUrl,
+        uid: uid);
   }
 
   String get _avatar => avatar;
@@ -72,4 +79,5 @@ class AngajatDataModel {
   String get _numar_inmatriculare => numar_inmatriculare;
   String get _nume => nume;
   String get _prenume => prenume;
+  String get _uid => uid;
 }

@@ -1,6 +1,7 @@
 import 'package:smartphone/models/Angajat_dataModel.dart';
 import 'package:smartphone/services/Database_service.dart';
 import 'package:smartphone/services/login_service.dart';
+import 'package:smartphone/services/media_service.dart';
 import 'package:smartphone/services/profile_services.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
@@ -12,11 +13,13 @@ class BaseModel extends BaseViewModel {
   final LoginServices loginServices = locator<LoginServices>();
   final ProfileServices profileServices = locator<ProfileServices>();
   final DatabaseService databaseService = locator<DatabaseService>();
+  final MediaService mediaService = locator<MediaService>();
 
   AngajatDataModel getCurrentUser() {
     return loginServices.currentUser;
   }
 
+  String get uid => getCurrentUser().uid;
   String get nume => getCurrentUser().nume;
   String get avatar => getCurrentUser().avatar;
   String get prenume => getCurrentUser().prenume;
