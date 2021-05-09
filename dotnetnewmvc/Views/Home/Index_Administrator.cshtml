@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = "Administrator";
+}
+
+<style>
+    h2 {
+        cursor: pointer;
+    }
+</style>
+
+<div style="position: absolute; width: 75%; height: 75%; top: 25%; left: 12.5%; right: 12.5%">
+    <h1 style="width: 100%; text-align: center;">Meniu administrator</h1>
+    <h2 id="1">1. Vizualizare statistici angajati</h2>
+    <h2 id="2">2. Setarea locurilor de parcare si configurarea cladirii firmei</h2>
+    <h2 id="3">3. Inserare date angajati</h2>
+    <h2 id="4">4. Generare raport</h2>
+</div>
+
+<script>
+    $('h2').on('click', function () {
+        var form = document.createElement('form');
+        form.setAttribute('method', 'POST');
+        var input = document.createElement('input');
+        input.setAttribute('type', 'hidden');
+        input.name = "administrator_menu_item";
+        input.value = $(this).attr('id');
+        form.appendChild(input);
+        document.querySelector('body').appendChild(form);
+        form.submit();
+    });
+</script>

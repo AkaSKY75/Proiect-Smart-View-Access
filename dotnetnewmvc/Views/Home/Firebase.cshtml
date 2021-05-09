@@ -1,0 +1,166 @@
+﻿@model dotnetnewmvc.Models.Angajat
+
+@{
+    ViewData["Title"] = "Firebase";
+}
+
+<script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+   https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-analytics.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-firestore.js"></script>
+
+
+<script>
+
+    class Angajat {
+        constructor(cnp, nume, prenume, numar_inmatriculare, etaj, birou, loc, avatar, email, email_firma, parola, departament) {
+            this.cnp = cnp;
+            this.nume = nume;
+            this.prenume = prenume;
+            this.numar_inmatriculare = numar_inmatriculare;
+            this.etaj = etaj;
+            this.birou = birou;
+            this.loc = loc;
+            this.avatar = avatar;
+            this.email = email;
+            this.email_firma = email_firma;
+            this.parola = parola;
+            this.departament = departament;
+        }
+        getDict() {
+            return {
+                "cnp": this.cnp,
+                "nume": this.nume,
+                "prenume": this.prenume,
+                "numar_inmatriculare": this.numar_inmatriculare,
+                "etaj": this.etaj,
+                "birou": this.birou,
+                "loc": this.loc,
+                "avatar": this.avatar,
+                "email": this.email,
+                "email_firma": this.email_firma,
+                "parola": this.parola,
+                "departament": this.departament
+            }
+        }
+    }
+
+    window.addEventListener("load", function () {
+        var firebaseConfig = {
+            apiKey: "AIzaSyDeV9pbD-ZeNoxM6eJFl0xngHqG6UVhFM0",
+            authDomain: "smartviewacces.firebaseapp.com",
+            databaseURL: "https://smartviewacces-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "smartviewacces",
+            storageBucket: "smartviewacces.appspot.com",
+            messagingSenderId: "751235009352",
+            appId: "1:751235009352:web:febf61f45aca0638f6017d",
+            measurementId: "G-8G121FG9R3"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+        db = firebase.firestore();
+        var Angajat = db.collection('Angajat');
+        var Administrator = db.collection('Administrator')
+        /*Administrator.get().then(snapshot => {
+            snapshot.docs.map(doc => {
+                var data = doc.data();
+                for (item in data)
+                    console.log(item, data[item])
+            });
+        });*/
+        var form = document.createElement('form');
+        form.setAttribute("method", "POST");
+
+        var finished_admin_check = false;
+        var finished_user_check = false;
+
+        var input;
+        var alldata = "";
+
+
+        Angajat.where("email", "==", "@Html.DisplayFor(model => model.email)")
+            .where("parola", "==", "@Html.DisplayFor(model => model.parola)")
+            .get()
+            .then((querySnapshot) => {
+                querySnapshot.forEach((ang) => {
+                    // doc.data() is never undefined for query doc snapshots
+
+                    input = document.createElement('input');
+                    var dataset = ang.data();
+                    input.setAttribute('type', 'hidden');
+                    input.name = "User";
+                    //console.log(ang.id);
+                    //console.log(Administrator.where("id", "==", "a7UNRVlmYa7ZS6KjYChe").get());
+
+
+                    alldata += "id: " + ang.id;
+                    for (var i in dataset) {
+                        alldata += "\n" + i + ": " + dataset[i];
+                    }
+
+                    Administrator.doc(ang.id).get().then((adm) => {
+                        if (adm.exists) {
+                            var input_admin = document.createElement('input');
+                            input_admin.setAttribute('type', 'hidden');
+                            input_admin.name = "is_Administrator";
+                            input_admin.value = "true";
+                            form.appendChild(input_admin);
+                        }
+                    }).then(function () {
+                        finished_admin_check = true;
+
+                    });
+
+
+
+
+                    //console.log(doc.id, " => ", doc.data());
+                });
+            })
+            .catch((error) => {
+                console.log("Error getting documents: ", error);
+            }).then(function () {
+                finished_user_check = true;
+                if (alldata == "")
+                    finished_admin_check = true;
+            });
+
+            function Refresh() {
+                if (finished_admin_check == false || finished_user_check == false) {
+                    window.setTimeout(Refresh, 100);
+                }
+                else {
+                    if (alldata != "")
+                    {
+                        input.value = alldata;
+
+                        form.appendChild(input);
+
+                    }
+
+
+                    document.querySelector('body').appendChild(form);
+                    form.submit();
+                }
+        }
+        Refresh();
+
+
+
+    });
+
+
+
+
+
+
+
+
+
+    //myPost.update({ cnp: "1234567891011"});
+    // myPost.where("camp", "operator", "valoare");
+    //db.collection('Angajat').doc().set((new Angajat("Html234567891231", "Mircea", "Dan", "HD56DMA", 1, 2, 3, "imagine", "email@email.com", "email2@email2.com", "123456789", "IT")).getDict());
+</script>
