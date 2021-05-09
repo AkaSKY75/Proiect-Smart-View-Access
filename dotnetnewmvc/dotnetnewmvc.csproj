@@ -4,4 +4,19 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Include="Models\Firebase.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\static\logo.png" />
+    <None Include="wwwroot\static\profile.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FireSharp.Serialization.JsonNet" Version="1.1.0" />
+    <PackageReference Include="Microsoft.ClearScript" Version="7.1.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.2" />
+  </ItemGroup>
+
 </Project>

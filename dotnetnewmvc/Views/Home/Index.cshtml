@@ -2,7 +2,21 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+
+<div style="position: absolute; width: 50%; height: 50%; left: 25%; bottom: 25%; left: 25%; right: 25%;">
+
+    <form method="POST">
+        <label for="email" style="width: 49ch; margin-left: calc(calc(100% - 49ch) / 2); margin-right: calc(calc(100% - 49ch) / 2); text-align: center;">Introduceți emailul personal sau cel de la firmă:</label><br />
+        <input type="email" name="email" style="width: 100%; text-align: center;" required /><br />
+        <label for="password" style="width: 100%; text-align: center; margin-top: 5%;">Introduceți parola dumneavoastră:</label><br />
+        <input type="password" name="password" style="width: 100%; text-align: center;" required /><br />
+        @{
+            if (ViewBag.failed_login == 1)
+            {
+                <p style="width: 100%; text-align: center; color: red;">Emailul sau parola gresite!</p>
+            }
+        }
+        <input type="submit" value="Autentificare" style="width: 13ch; margin-left: calc(calc(100% - 13ch) / 2); margin-right: calc(calc(100% - 13ch) / 2); text-align: center; margin-top: 2.5%;" />
+    </form>
 </div>

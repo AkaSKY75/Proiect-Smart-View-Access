@@ -1,25 +1,31 @@
 {
   "format": 1,
   "restore": {
-    "/home/ubuntu/dotnetnewmvc/dotnetnewmvc.csproj": {}
+    "C:\\Users\\bossu\\source\\repos\\Proiect-Smart-View-Access\\dotnetnewmvc\\dotnetnewmvc.csproj": {}
   },
   "projects": {
-    "/home/ubuntu/dotnetnewmvc/dotnetnewmvc.csproj": {
+    "C:\\Users\\bossu\\source\\repos\\Proiect-Smart-View-Access\\dotnetnewmvc\\dotnetnewmvc.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/ubuntu/dotnetnewmvc/dotnetnewmvc.csproj",
+        "projectUniqueName": "C:\\Users\\bossu\\source\\repos\\Proiect-Smart-View-Access\\dotnetnewmvc\\dotnetnewmvc.csproj",
         "projectName": "dotnetnewmvc",
-        "projectPath": "/home/ubuntu/dotnetnewmvc/dotnetnewmvc.csproj",
-        "packagesPath": "/home/ubuntu/.nuget/packages/",
-        "outputPath": "/home/ubuntu/dotnetnewmvc/obj/",
+        "projectPath": "C:\\Users\\bossu\\source\\repos\\Proiect-Smart-View-Access\\dotnetnewmvc\\dotnetnewmvc.csproj",
+        "packagesPath": "C:\\Users\\bossu\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\bossu\\source\\repos\\Proiect-Smart-View-Access\\dotnetnewmvc\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\"
+        ],
         "configFilePaths": [
-          "/home/ubuntu/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\bossu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net5.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -37,6 +43,20 @@
       "frameworks": {
         "net5.0": {
           "targetAlias": "net5.0",
+          "dependencies": {
+            "FireSharp.Serialization.JsonNet": {
+              "target": "Package",
+              "version": "[1.1.0, )"
+            },
+            "Microsoft.ClearScript": {
+              "target": "Package",
+              "version": "[7.1.2, )"
+            },
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+              "target": "Package",
+              "version": "[5.0.2, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -55,7 +75,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/5.0.202/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.201\\RuntimeIdentifierGraph.json"
         }
       }
     }
