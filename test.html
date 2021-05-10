@@ -3,7 +3,7 @@
 		<p>Pula</p>
 	</body>
 	<script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
-	<script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-analytics.js"></script>
+	<!--<script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-analytics.js"></script> -->
 	<script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-firestore.js"></script>
 	<script>
 		var p
@@ -54,5 +54,8 @@
 			p.textContent = "Eroare: "+ error;
 			document.querySelector('body').appendChild(p);
 		});
+		p = document.createElement('p');
+		p.textContent="Finished"
+		document.querySelector('body').appendChild(p);
 	</script>
 </html>
