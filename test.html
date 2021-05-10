@@ -1,0 +1,58 @@
+<html>
+	<body>
+		<p>Pula</p>
+	</body>
+	<script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-analytics.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-firestore.js"></script>
+	<script>
+		var p
+		var firebaseConfig = {
+					apiKey: "AIzaSyDeV9pbD-ZeNoxM6eJFl9xngHqG6UVhFM0",
+					authDomain: "smartviewaccess.firebaseapp.com",
+					databaseURL: "https://smartviewaccess-default-rtdb.europe-west1.firebasedatabase.app",
+					projectId: "smartviewaccess",
+					storageBucket: "smartviewaccess.appspot.com",
+					messagingSenderId: "751235009352",
+					appId: "1:751235009352:web:febf61f45aca0638f6017d",
+					measurementId: "G-8G121FG9R3"
+		};
+		p = document.createElement('p');
+		p.textContent="Inainte";
+		document.querySelector('body').appendChild(p);
+		firebase.initializeApp(firebaseConfig);
+		p = document.createElement('p');
+		p.textContent = "Ajunge aici";
+		document.querySelector('body').appendChild(p);
+		//fiebase.analytics();
+		p = document.createElement('p');
+		p.textContent = "Analytics initialized"
+		document.querySelector('body').appendChild(p);
+		db = firebase.firestore();
+		p = document.createElement('p');
+		p.textContent = "Firestore initialized"
+		document.querySelector('body').appendChild(p);
+		db.collection("Administrator").add({});
+		p = document.createElement('p');
+		p.textContent = "Added to databse"
+		document.querySelector('body').appendChild(p);
+		
+		var Administrator = db.collection('Administrator');
+		Administrator.get().then(snapshot => {
+			snapshot.docs.map(doc => {
+				var data = doc.data();
+				for(item in data)
+				{
+					p = document.createElement('p');
+					p.textContent = data[item];
+					document.querySelector('body').appendChild(p);
+				}
+			});
+		})
+		.catch((error) => {
+			p = document.createElement('p');
+			p.textContent = "Eroare: "+ error;
+			document.querySelector('body').appendChild(p);
+		});
+	</script>
+</html>
