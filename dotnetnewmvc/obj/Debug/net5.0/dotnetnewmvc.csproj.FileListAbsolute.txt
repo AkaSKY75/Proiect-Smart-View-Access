@@ -428,3 +428,4 @@ E:\Faculta\IP\Proiect Smart View Access\Proiect-Smart-View-Access\dotnetnewmvc\o
 E:\Faculta\IP\Proiect Smart View Access\Proiect-Smart-View-Access\dotnetnewmvc\obj\Debug\net5.0\ref\dotnetnewmvc.dll
 E:\Faculta\IP\Proiect Smart View Access\Proiect-Smart-View-Access\dotnetnewmvc\obj\Debug\net5.0\dotnetnewmvc.pdb
 E:\Faculta\IP\Proiect Smart View Access\Proiect-Smart-View-Access\dotnetnewmvc\obj\Debug\net5.0\dotnetnewmvc.genruntimeconfig.cache
+E:\Faculta\IP\Proiect Smart View Access\Proiect-Smart-View-Access\dotnetnewmvc\obj\Debug\net5.0\Razor\Views\Home\Administrator_Menu_3.cshtml.g.cs

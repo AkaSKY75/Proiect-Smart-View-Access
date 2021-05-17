@@ -8,11 +8,14 @@
     }
 </style>
 
-<div style="position: absolute; width: 75%; height: 75%; top: 25%; left: 12.5%; right: 12.5%">
+<label for="profile_pic_select"><img id="profile_pic" src="@ViewBag.Image" style="position: absolute; width: 15%; height: auto; top: 1%; left: 1%; cursor: pointer;" /></label>
+<input id="profile_pic_select" name="profile_pic_select" type="file" accept="image/*" style="display: none;" />
+
+<div style="position: absolute; width: 60%; height: 75%; top: 25%; left: 20%; right: 20%">
     <h1 style="width: 100%; text-align: center;">Meniu administrator</h1>
-    <h2 id="1">1. Vizualizare statistici angajati</h2>
-    <h2 id="2">2. Setarea locurilor de parcare si configurarea cladirii firmei</h2>
-    <h2 id="3">3. Inserare date angajati</h2>
+    <h2 id="1">1. Vizualizare statistici angajați</h2>
+    <h2 id="2">2. Setarea locurilor de parcare și configurarea clădirii firmei</h2>
+    <h2 id="3">3. Inserare date angajați</h2>
     <h2 id="4">4. Generare raport</h2>
 </div>
 
@@ -25,7 +28,33 @@
         input.name = "administrator_menu_item";
         input.value = $(this).attr('id');
         form.appendChild(input);
+        input = document.createElement('input');
+        input.setAttribute('type', 'hidden');
+        input.name = "uid";
+        input.value = "@ViewBag.uid";
+        form.appendChild(input);
         document.querySelector('body').appendChild(form);
         form.submit();
+    });
+    $("#profile_pic_select").change(function () {
+        var input = this;
+        if (input.files && input.files[0]) {
+            var filesize = ((input.files[0].size / 1024) / 1024).toFixed(4); // MB
+            if (filesize > 5) {
+                alert("Eroare! Imaginile mai mari de 5MB nu sunt acceptate!");
+            }
+            else {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $("#profile_pic").attr("src", e.target.result);
+                    $.ajax({
+                        url: "/",
+                        method: "POST",
+                        data: { "uid": "@ViewBag.uid", "change_profile_pic": e.target.result }
+                    });
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
     });
 </script>

@@ -76,14 +76,14 @@ namespace dotnetnewmvc
                         await stream.WriteAsync(new byte[] { 0 });
                         string id = jresponse.First()["name"].ToString();
                         string path;
-                        query = "{\"structuredQuery\": { \"select\": {\"fields\": [{\"fieldPath\": \"name\"}]}, \"from\": [{ \"collectionId\": \"Parcare\" }], \"where\": { \"fieldFilter\": {\"field\": {\"fieldPath\": \"data\"}, \"op\": \"EQUAL\", \"value\": {\"timestampValue\": \"" + DateTime.Today.AddDays(-1).ToString("yyyy-MM-ddT") + "21:00:00Z" + "\"}}}}}";
+                        query = "{\"structuredQuery\": { \"select\": {\"fields\": [{\"fieldPath\": \"name\"}]}, \"from\": [{ \"collectionId\": \"Parcare\" }], \"where\": { \"fieldFilter\": {\"field\": {\"fieldPath\": \"data\"}, \"op\": \"EQUAL\", \"value\": {\"stringValue\": \"" + DateTime.Today.ToString("yyyyMMdd") + "000000" + "\"}}}}}";
                         json = JObject.Parse(query);
                         content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
                         response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
                         jresponse = JArray.Parse(response).Children()["document"];
                         if (jresponse.Count() == 0) // First carplate number of new day
                         {
-                            query = "{ \"fields\": { \"data\": {\"timestampValue\": \"" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-ddT") + "21:00:00Z" + "\"}}}";
+                            query = "{ \"fields\": { \"data\": {\"stringValue\": \"" + DateTime.Today.ToString("yyyyMMdd") + "000000" + "\"}}}";
                             json = JObject.Parse(query);
                             content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
                             response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Parcare/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
@@ -232,42 +232,58 @@ namespace dotnetnewmvc
                                 string id = jresponse.First()["name"].ToString().Substring(jresponse.First()["name"].ToString().LastIndexOf('/')+1);
                                 
                                 /* Get all entries starting form 12PM from the current day having id same as employer*/
-                                values = "{ \"structuredQuery\": { \"where\": {\"compositeFilter\": { \"op\": \"AND\", \"filters\": [{ \"fieldFilter\": {\"field\": {\"fieldPath\": \"id\"}, \"op\": \"EQUAL\", \"value\": {\"referenceValue\": \"projects/smartviewacces/databases/(default)/documents/Angajat/" + id + "\"}}}, { \"fieldFilter\": {\"field\": {\"fieldPath\": \"Intrare\"}, \"op\": \"GREATER_THAN_OR_EQUAL\", \"value\": {\"timestampValue\": \"" + DateTime.Today.AddDays(-1).ToString("yyyy-MM-ddT") + "21:00:00Z"+"\"}}}]}}, \"from\": [{\"collectionId\": \"Pontaj\"}]}}";
+                                values = "{ \"structuredQuery\": { \"where\": {\"compositeFilter\": { \"op\": \"AND\", \"filters\": [{ \"fieldFilter\": {\"field\": {\"fieldPath\": \"id\"}, \"op\": \"EQUAL\", \"value\": {\"referenceValue\": \"projects/smartviewacces/databases/(default)/documents/Angajat/" + id + "\"}}}, { \"fieldFilter\": {\"field\": {\"fieldPath\": \"Iesire\"}, \"op\": \"EQUAL\", \"value\": {\"stringValue\": \"-1\"}}}]}}, \"from\": [{\"collectionId\": \"Pontaj\"}]}}";
                                 json = JObject.Parse(values);
                                 //Debug.WriteLine(json.ToString());
                                 content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
                                 response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
-                                //Debug.WriteLine(response);
+                                Debug.WriteLine(response);
                                 jresponse = JArray.Parse(response).Children()["document"];
-                                int intrari = jresponse.Count();
+                                if(jresponse.Count() != 0)
+                                {
+                                    values = "{ \"fields\": { \"Iesire\": {\"stringValue\": \"" + DateTime.Now.ToString("yyyyMMddHHmmss") + "\"}}}";
+                                    json = JObject.Parse(values);
+                                    content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                                    response = await http.PatchAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Pontaj" + jresponse.First()["name"].ToString().Substring(jresponse.First()["name"].ToString().LastIndexOf('/')) + "?updateMask.fieldPaths=Iesire&key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                                    Debug.WriteLine(response);
+                                }
+                                else
+                                {
+                                    values = "{ \"fields\": { \"id\": {\"referenceValue\": \"projects/smartviewacces/databases/(default)/documents/Angajat/" + id + "\"}, \"Intrare\": {\"stringValue\": \"" + DateTime.Now.ToString("yyyyMMddHHmmss") + "\"}, \"Iesire\": {\"stringValue\": \"-1\"}}}";
+                                    json = JObject.Parse(values);
+                                    //Debug.WriteLine(json.ToString());
+                                    content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                                    response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Pontaj/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                                    Debug.WriteLine(response);
+                                }
 
-                                values = "{ \"structuredQuery\": { \"where\": {\"compositeFilter\": { \"op\": \"AND\", \"filters\": [{ \"fieldFilter\": {\"field\": {\"fieldPath\": \"id\"}, \"op\": \"EQUAL\", \"value\": {\"referenceValue\": \"projects/smartviewacces/databases/(default)/documents/Angajat/" + id + "\"}}}, { \"fieldFilter\": {\"field\": {\"fieldPath\": \"Iesire\"}, \"op\": \"GREATER_THAN_OR_EQUAL\", \"value\": {\"timestampValue\": \""+DateTime.Today.AddDays(-1).ToString("yyyy-MM-ddT") + "21:00:00Z" + "\"}}}]}}, \"from\": [{\"collectionId\": \"Pontaj\"}]}}";
+                            /*values = "{ \"structuredQuery\": { \"where\": {\"compositeFilter\": { \"op\": \"AND\", \"filters\": [{ \"fieldFilter\": {\"field\": {\"fieldPath\": \"id\"}, \"op\": \"EQUAL\", \"value\": {\"referenceValue\": \"projects/smartviewacces/databases/(default)/documents/Angajat/" + id + "\"}}}, { \"fieldFilter\": {\"field\": {\"fieldPath\": \"Iesire\"}, \"op\": \"GREATER_THAN_OR_EQUAL\", \"value\": {\"timestampValue\": \""+DateTime.Today.AddDays(-1).ToString("yyyy-MM-ddT") + "21:00:00Z" + "\"}}}]}}, \"from\": [{\"collectionId\": \"Pontaj\"}]}}";
+                            json = JObject.Parse(values);
+                            //Debug.WriteLine(json.ToString());
+                            content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                            response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                            //Debug.WriteLine(response);
+                            jresponse = JArray.Parse(response).Children()["document"];
+                            int iesiri = jresponse.Count();
+
+                            if (intrari == iesiri)
+                            {
+                                values = "{ \"fields\": { \"id\": {\"referenceValue\": \"projects/smartviewacces/databases/(default)/documents/Angajat/" + id + "\"}, \"Intrare\": {\"timestampValue\": \"" + DateTime.Now.AddHours(-3).ToString("yyyy-MM-ddTHH:mm:ss") + ".00Z" + "\"}}}";
                                 json = JObject.Parse(values);
-                                //Debug.WriteLine(json.ToString());
                                 content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-                                response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                                await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Pontaj/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
                                 //Debug.WriteLine(response);
-                                jresponse = JArray.Parse(response).Children()["document"];
-                                int iesiri = jresponse.Count();
-
-                                if (intrari == iesiri)
-                                {
-                                    values = "{ \"fields\": { \"id\": {\"referenceValue\": \"projects/smartviewacces/databases/(default)/documents/Angajat/" + id + "\"}, \"Intrare\": {\"timestampValue\": \"" + DateTime.Now.AddHours(-3).ToString("yyyy-MM-ddTHH:mm:ss") + ".00Z" + "\"}}}";
-                                    json = JObject.Parse(values);
-                                    content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-                                    await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Pontaj/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
-                                    //Debug.WriteLine(response);
-                                }
-                                else if(iesiri < intrari)
-                                {
-                                    values = "{ \"fields\": { \"id\": {\"referenceValue\": \"projects/smartviewacces/databases/(default)/documents/Angajat/" + id + "\"}, \"Iesire\": {\"timestampValue\": \"" + DateTime.Now.AddHours(-3).ToString("yyyy-MM-ddTHH:mm:ss")+".00Z" + "\"}}}";
-                                    json = JObject.Parse(values);
-                                    content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-                                    await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Pontaj/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
-                                    //Debug.WriteLine(response);
-                                }
-
                             }
+                            else if(iesiri < intrari)
+                            {
+                                values = "{ \"fields\": { \"id\": {\"referenceValue\": \"projects/smartviewacces/databases/(default)/documents/Angajat/" + id + "\"}, \"Iesire\": {\"timestampValue\": \"" + DateTime.Now.AddHours(-3).ToString("yyyy-MM-ddTHH:mm:ss")+".00Z" + "\"}}}";
+                                json = JObject.Parse(values);
+                                content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                                await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Pontaj/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                                //Debug.WriteLine(response);
+                            }*/
+
+                        }
                                 
                         }
                 }

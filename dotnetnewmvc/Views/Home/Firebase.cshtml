@@ -1,10 +1,4 @@
-﻿@model dotnetnewmvc.Models.Angajat
-
-@{
-    ViewData["Title"] = "Firebase";
-}
-
-<script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
+﻿<script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
 
 <!-- TODO: Add SDKs for Firebase products that you want to use
    https://firebase.google.com/docs/web/setup#available-libraries -->
@@ -81,8 +75,8 @@
         var alldata = "";
 
 
-        Angajat.where("email", "==", "@Html.DisplayFor(model => model.email)")
-            .where("parola", "==", "@Html.DisplayFor(model => model.parola)")
+        Angajat.where("email", "==", "")
+            .where("parola", "==", "")
             .get()
             .then((querySnapshot) => {
                 querySnapshot.forEach((ang) => {

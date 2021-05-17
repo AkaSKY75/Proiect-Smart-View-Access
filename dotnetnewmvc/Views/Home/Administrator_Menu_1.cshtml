@@ -1,120 +1,248 @@
-﻿<html>
-<head>
+﻿@{
+    ViewData["Title"] = "Administrator";
+}
 
+<style>
+    .hidden {
+        display: none;
+    }
 
-    <style>
-        th {
-            text-align: center;
-        }
+    th {
+        width: 25%;
+    }
 
-        body {
-            background-color: #eeeeee;
-            padding: 10px;
-            margin: 10px;
-        }
+    td {
+        width: 25%;
+    }
 
-        .scrollClass {
-            width: 100%;
-            height: 300px;
-            overflow-y: auto;
-        }
+    .error {
+        background-color: #FF6347;
+    }
+</style>
 
-        .form-select {
-            width: 50%;
-            height: 30px;
-            background-color: rgba(255,255,255,0.1)
-        }
+<label for="profile_pic_select"><img id="profile_pic" src="@ViewBag.Image" style="position: absolute; width: 15%; height: auto; top: 1%; left: 1%; cursor: pointer;" /></label>
+<input id="profile_pic_select" name="profile_pic_select" type="file" accept="image/*" style="display: none;" />
 
-        .form-control {
-        }
-    </style>
-</head>
-<body>
-    <div class="container" style="margin:0px;padding:0px;width:100%; top:10%;">
-        <div class="col-sm-3">
-            <img src="avatar1.png" width="200px" height="200px" style="display:block;">
-            <div style="padding-top:15%">
-                <label>De la :</label>
-                <input type="date" name="1" style="float:right">
-                <br>
-                <br>
-                <br>
-                <label>
-                    Pana la:
-                </label>
-                <input type="date" name="2" style="float:right">
-            </div>
+<div style="position: absolute; top: 15%; width: 50%; margin-left: 25%; margin-right: 25%; height: 85%;">
+    <h1 style="width: 100%; height: 25%; text-align: center; margin: 0;">Statistica prezențelor în firmă a tuturor angajaților</h1>
+    <div style="position: relative; width: 100%; margin-bottom: 1%; height: 5%;  display: flex;">
+        <div id="month_select" style="position: relative; cursor: pointer; user-select: none; width: 25%; margin-bottom: 1%; height: 100%; border: 1px solid grey; background-color: #E9ECEF;">
+            <p id="current_month" data-month="@ViewBag.CurrentMonth" style="margin: 0; width: 100%; height: 100%;">@ViewBag.Months[ViewBag.CurrentMonth - 1]</p>
+            <i style="position: absolute; color: grey; right: 5%; top: 20%;" class="fas fa-caret-down"></i>
         </div>
-
-        <div class="col-sm-6" style=" margin-top:5%">
-
-            <h1 style="text-align: center;">Statistica prezentelor in firme </h1>
-            <hr>
-            <br>
-            <div class="col-sm-4" style="float:left">
-
-                <h4>Numar total de ore: 70</h4>
-            </div>
-            <div class="col-sm-4">
-
-            </div>
-            <div class="col-sm-4" style="text-align:right">
-                <input type="text" class="form-control" placeholder="Nume angajat">
-            </div>
-            <div class="scrollClass">
-                <table class="table" style="text-align:center;">
-                    <thead>
-                        <tr>
-
-                            <th scope="col">Intrare</th>
-                            <th scope="col">Iesire</th>
-                            <th scope="col">Numar de ore</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>12/3/2021 8:20:00 AM</td>
-                            <td>12/3/2021 8:20:00 AM</td>
-                            <td>12/3/2021 8:20:00 AM</td>
-                        </tr>
-                        <tr>
-                            <td>12/3/2021 8:20:00 AM</td>
-                            <td>12/3/2021 8:20:00 AM</td>
-                            <td>12/3/2021 8:20:00 AM</td>
-                        </tr>
-                        <tr>
-                            <td>12/3/2021 8:20:00 AM</td>
-                            <td>12/3/2021 8:20:00 AM</td>
-                            <td>12/3/2021 8:20:00 AM</td>
-                        </tr>
-                        <tr>
-                            <td>12/3/2021 8:20:00 AM</td>
-                            <td>12/3/2021 8:20:00 AM</td>
-                            <td>12/3/2021 8:20:00 AM</td>
-                        </tr>
-                        <tr>
-                            <td>12/3/2021 8:20:00 AM</td>
-                            <td>12/3/2021 8:20:00 AM</td>
-                            <td>12/3/2021 8:20:00 AM</td>
-                        </tr>
-                        <tr>
-                            <td>12/3/2021 8:20:00 AM</td>
-                            <td>12/3/2021 8:20:00 AM</td>
-                            <td>12/3/2021 8:20:00 AM</td>
-                        </tr>
-                        <tr>
-                            <td>12/3/2021 8:20:00 AM</td>
-                            <td>12/3/2021 8:20:00 AM</td>
-                            <td>12/3/2021 8:20:00 AM</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="col-sm-3">
-            <img src="logo.png" width="200px" height="200px" style="float:right">
-        </div>
+        <p style="width: 25%; text-align: center;">Cautare angajat:</p>
+        <input id="search_name" style="width: 25%" />
+        <p id="total_hours" style="width: 25%;">Numar total de ore: @ViewBag.Total<p>
     </div>
-</body>
+    <div id="months" class="hidden" style="top: 30%; position: absolute; width: 25%; background-color: white; border-left: 1px solid grey; border-bottom: 1px solid grey; border-right: 1px solid grey;">
+        @for (int i = 12; i >= 1; i--)
+        {
+            if (i > ViewBag.CurrentMonth)
+            {
+                <p class="dropdown-element" data-month="@i" style="margin: 0; display: none; cursor: pointer; width: 100%;">@ViewBag.Months[i - 1]</p>
+            }
+            else
+            {
+                <p class="dropdown-element" data-month="@i" style="margin: 0; cursor: pointer; width: 100%;">@ViewBag.Months[i - 1]</p>
+            }
+        }
+        <i style="position: absolute; bottom: 2.5%; left: 5%;" class="fas fa-edit"></i>
+        <input class="dropdown-element" id="year" style="width: 100%; text-align: center; border: 0; outline:none;" type="text" data-current="@DateTime.Now.Year" value="@DateTime.Now.Year" />
+    </div>
+    <table border="1" style="width: 100%; max-height: 69%; border: 1px solid black; overflow-y: auto;">
+        <tr>
+            <th style="text-align: center;">Nume angajat</th>
+            <th style="text-align: center;">Intrare</th>
+            <th style="text-align: center;">Ieșire</th>
+            <th style="text-align: center;">Număr de ore</th>
+        </tr>
 
-</html>
+        @for (int i = 0; i < ViewBag.Count; i++)
+        {
+            <tr>
+            @if (i % 2 != 0)
+            {
+                <td align="center" style="background-color: #F5F5F5;">
+                    @ViewBag.Angajat[i]
+                </td>
+                <td align="center" style="background-color: #F5F5F5;">
+                    @ViewBag.Intrari[i].ToString("dd/MM/yyyy hh:mm:ss tt")
+                </td>
+                <td align="center" style="background-color: #F5F5F5;">
+                    @ViewBag.Iesiri[i].ToString("dd/MM/yyyy hh:mm:ss tt")
+                </td>
+                <td align="center" style="background-color: #F5F5F5;">
+                    @ViewBag.Ore[i]
+                </td>
+            }
+            else
+            {
+                <td align="center">
+                    @ViewBag.Angajat[i]
+                </td>
+                <td align="center">
+                    @ViewBag.Intrari[i].ToString("dd/MM/yyyy hh:mm:ss tt")
+                </td>
+                <td align="center">
+                    @ViewBag.Iesiri[i].ToString("dd/MM/yyyy hh:mm:ss tt")
+                </td>
+                <td align="center">
+                    @ViewBag.Ore[i]
+                </td>
+            }
+            </tr>
+        }
+    </table>
+</div>
+
+<script>
+    $('#month_select').on('click', function () {
+        $('#months').toggleClass('hidden');
+    });
+    $(".dropdown-element").mouseenter(function () {
+        if (!$(this).hasClass('error'))
+            $(this).css('background-color', '#4C8BF5');
+    });
+    $(".dropdown-element").mouseleave(function () {
+        if (!$(this).hasClass('error'))
+            $(this).css('background-color', '');
+    });
+    $(".dropdown-element:not('input')").on("click", function () {
+        var month = $(this).data('month');
+        var months = ["Ianuarie", "Februarie", "Martie", "Aprilie", "Mai", "Iunie", "Iulie", "August", "Septembrie", "Octombrie", "Noiembrie", "Decembrie"];
+        $.ajax({
+            url: "/",
+            method: "POST",
+            data: { "change_month": month, "change_year": $("#year").val()},
+            success: function (data) {
+                document.querySelector('table').innerHTML = "<tr><th style = 'text-align: center;'>Nume angajat</th><th style = 'text-align: center;'>Intrare</th><th style='text-align: center;'>Ieșire</th><th style='text-align: center;'>Număr de ore</th></tr>"
+                for (var i = 0; i < data["iesiri"].length; i++) {
+                    var date = data["intrari"][i].substring(8, 10) + "/" + data["intrari"][i].substring(5, 7) + "/" + data["intrari"][i].substring(0, 4) + " ";
+                    if (+data["intrari"][i].substring(11, 13) > 12) {
+                        date += "0";
+                        date += +data["intrari"][i].substring(11, 13) - 12 + ":" + data["intrari"][i].substring(14, 16) + ":" + data["intrari"][i].substring(17, 19) + " PM";
+                    }
+                    else
+                        date += data["intrari"][i].substring(11, 13) + ":" + data["intrari"][i].substring(14, 16) + ":" + data["intrari"][i].substring(17, 19) + " AM";
+
+                    var tr = document.createElement('tr');
+                    var td = document.createElement('td');
+                    td.align = "center";
+                    td.innerText = data["angajat"][i];
+                    if (i % 2 != 0)
+                        td.style.backgroundColor = "#F5F5F5";
+                    tr.appendChild(td);
+                    td = document.createElement('td');
+                    td.align = "center";
+                    td.innerText = date;
+                    if (i % 2 != 0)
+                        td.style.backgroundColor = "#F5F5F5";
+                    tr.appendChild(td);
+                    date = data["iesiri"][i].substring(8, 10) + "/" + data["iesiri"][i].substring(5, 7) + "/" + data["iesiri"][i].substring(0, 4) + " ";
+                    if (+data["iesiri"][i].substring(11, 13) > 12) {
+                        date += "0";
+                        date += +data["iesiri"][i].substring(11, 13) - 12 + ":" + data["iesiri"][i].substring(14, 16) + ":" + data["iesiri"][i].substring(17, 19) + " PM";
+
+                    }
+                    else
+                        date += data["iesiri"][i].substring(11, 13) + ":" + data["iesiri"][i].substring(14, 16) + ":" + data["iesiri"][i].substring(17, 19) + " AM";
+                    td = document.createElement('td');
+                    td.align = "center";
+                    td.innerText = date;
+                    if (i % 2 != 0)
+                        td.style.backgroundColor = "#F5F5F5";
+                    tr.appendChild(td);
+                    td = document.createElement('td');
+                    td.align = "center";
+                    td.innerText = data["ore"][i];
+                    if (i % 2 != 0)
+                        td.style.backgroundColor = "#F5F5F5";
+                    tr.appendChild(td);
+                    document.querySelector('table').appendChild(tr);
+                }
+                $('#current_month').text(months[+month - 1]);
+                $('#total_hours').text("Numar total de ore: "+data["total"]);
+            }
+        });
+    });
+    $('#search_name').on('input', function () {
+        var rows = $('table').find('tr');
+        for (i = 1; i < rows.length; i++)
+            if (!rows.eq(i).find('td').eq(0).text().toLowerCase().includes($(this).val().toLowerCase())) {
+                rows.eq(i).css('display', 'none');
+            }
+            else {
+                rows.eq(i).css('display', '');
+            }
+    });
+    $('#year').on("input", function () {
+        var nums = "0123456789";
+        var text = $(this).val();
+        if (text.length != 4) {
+            $(this).css('background-color', '');
+            $(this).addClass('error');
+        }
+        else if (!nums.includes(text[0]) || !nums.includes(text[1]) || !nums.includes(text[2]) || !nums.includes(text[3]))
+        {
+            $(this).css('background-color', '');
+            $(this).addClass('error');
+        }
+        else if (+text > +$(this).data('current'))
+        {
+            $(this).css('background-color', '');
+            $(this).addClass('error');
+        }
+        else {
+            $(this).removeClass('error');
+            if (+text < +$(this).data('current'))
+                $("p.dropdown-element").css('display', '');
+            else {
+                i = 12;
+                while (i != +$('#current_month').data('month')) {
+                    $('.dropdown-element[data-month="' + i + '"').css('display', 'none');
+                    i--;
+                }
+
+            }
+
+        }
+    });
+    $('#year').change(function () {
+        if ($(this).hasClass("error")) {
+            $(this).removeClass("error");
+            $(this).val($(this).data('current'));
+            i = 12;
+            while (i != +$('#current_month').data('month')) {
+                $('.dropdown-element[data-month="' + i + '"').css('display', 'none');
+                i--;
+            }
+        }
+    });
+    $("#profile_pic_select").change(function () {
+        var input = this;
+        if (input.files && input.files[0]) {
+            var filesize = ((input.files[0].size / 1024) / 1024).toFixed(4); // MB
+            if (filesize > 5) {
+                alert("Eroare! Imaginile mai mari de 5MB nu sunt acceptate!");
+            }
+            else {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $("#profile_pic").attr("src", e.target.result);
+                    $.ajax({
+                        url: "/",
+                        method: "POST",
+                        data: { "uid": "@ViewBag.uid", "change_profile_pic": e.target.result }
+                    });
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    });
+    $('html').on("click", function (e) {
+        if (e.target.id != "months" && e.target.id != "month_select" && e.target.parentElement.id != "months" && e.target.parentElement.id != "month_select")
+        {
+            $('#months').addClass('hidden');
+        }
+    });
+</script>
