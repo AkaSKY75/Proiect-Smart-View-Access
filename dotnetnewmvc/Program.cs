@@ -42,6 +42,7 @@ namespace dotnetnewmvc
             ushort checksum;
             byte[] bytes = new byte[515];
             await stream.ReadAsync(bytes, 0, 2);
+            Debug.WriteLine(bytes[0] + " " + bytes[1]);
             /*   Device is 1 and command to execute is 0 => Scenario when Raspberry PI send a carplate number to be checked in the database   */
             if(bytes[0] == 1 && bytes[1] == 0)
             {                

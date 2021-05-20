@@ -313,12 +313,9 @@ namespace dotnetnewmvc.Controllers
                                 ViewBag.Iesiri = iesiri;
                                 ViewBag.Ore = ore;
                                 return View("Administrator_Menu_1");
-                    case "2":   values = "{ \"structuredQuery\": {\"select\": {\"fields\": [{\"fieldPath\": \"index\"}, {\"fieldPath\": \"name\"}]}, \"orderBy\": [{\"direction\": \"ASCENDING\", \"field\": {\"fieldPath\": \"index\"}}], \"from\": [{\"collectionId\": \"Etaj\"}]}}";
-                                json = JObject.Parse(values);
-                                content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-                                response = SendHttpRequest("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Cladire/Cladire_SmartView:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "POST");
-                                jresponse = JArray.Parse(response).Children()["document"];
-                                List<string> etaje = new List<string>();
+                    case "2":   
+                                //jresponse = JArray.Parse(response).Children()["document"];
+                                /*List<string> etaje = new List<string>();
                                 List<string> etaje_ids = new List<string>();
                                 List<string> birouri = new List<string>();
                                 List<string> birouri_ids = new List<string>();
@@ -334,7 +331,7 @@ namespace dotnetnewmvc.Controllers
                                 ViewBag.Birouri = birouri;
                                 ViewBag.Birouri_ids = birouri_ids;
                                 ViewBag.Locuri = locuri;
-                                //return View();
+                                //return View();*/
                                 return View("Administrator_Menu_2");
                     case "3":   values = "{ \"structuredQuery\": {\"select\": {\"fields\": [{\"fieldPath\": \"cnp\"}, {\"fieldPath\": \"email\"}, {\"fieldPath\": \"email_firma\"}, {\"fieldPath\": \"nume\"}, {\"fieldPath\": \"prenume\"}, {\"fieldPath\": \"numar_inmatriculare\"}, {\"fieldPath\": \"departament\"}, {\"fieldPath\": \"etaj\"}, {\"fieldPath\": \"birou\"}, {\"fieldPath\": \"loc\"}]}, \"from\": [{\"collectionId\": \"Angajat\"}]}}";
                                 json = JObject.Parse(values);
