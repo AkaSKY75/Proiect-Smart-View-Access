@@ -1,0 +1,151 @@
+﻿@{
+    ViewData["Title"] = "Administrator";
+}
+
+<style>
+    .hidden {
+        display: none;
+    }
+
+</style>
+
+<label for="profile_pic_select"><img id="profile_pic" src="@ViewBag.Image" style="position: absolute; width: 15%; height: auto; top: 1%; left: 1%; cursor: pointer;" /></label>
+<input id="profile_pic_select" name="profile_pic_select" type="file" accept="image/*" style="display: none;" />
+
+<div style="position: absolute; width: 15%; height: 70%; top: 30%; right: 0; padding: 1% 1% 1% 1%;">
+    <p style="position: absolute; top: 0; width: 75%; left: 12.5%; right: 12.5%; background-color: white; text-align: center; z-index: 1;">Lista de obiecte</p>
+    <div style="position: relative; width: 100%; height: 100%; border: 5px solid black;">
+        <div style="height: 33.3%; width: 75%; margin-left: 12.5%; margin-right: 12.5%; padding: 2% 1% 1% 1%;">
+            <div id="toolbox_wall" style="height: 100%; width: 100%; cursor: pointer;">
+                <i style="width: 100%; margin-top: 25%; text-align: center;" class="fas fa-map fa-3x" aria-hidden="true"></i>
+                <p style="margin: 0; text-align: center;">Adăugați un perete</p>
+            </div>
+        </div>
+        <div id="toolbox_desk" style="height: 33.3%; width: 75%; margin-left: 12.5%; margin-right: 12.5%; padding: 1% 1% 1% 1%;">
+            <div style="height: 100%; width: 100%; cursor: pointer;">
+                <i style="width: 100%; margin-top: 25%; text-align: center;" class="fas fa-solar-panel fa-3x" aria-hidden="true"></i>
+                <p style="margin: 0; text-align: center;">Adăugați un birou</p>
+            </div>
+        </div>
+        <div id="toolbox_chair" style="height: 33.3%; width: 75%; margin-left: 12.5%; margin-right: 12.5%; padding: 1% 1% 2% 1%;">
+            <div style="height: 100%; width: 100%; cursor: pointer;">
+                <i style="width: 100%; margin-top: 25%; text-align: center;" class="fas fa-chair fa-3x" aria-hidden="true"></i>
+                <p style="margin: 0; text-align: center;">Adăugați un loc</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="position: absolute; top: 15%; width: 50%; left: 25%; right: 25%; height: 85%;">
+    <h1 style="width: 100%; height: 25%; text-align: center; margin: 0;">Setarea locurilor de parcare și configurarea clădirii firmei</h1>
+    <div style="position: relative; width: 100%; margin-bottom: 1%; height: 5%;  display: flex;">
+        <div id="floor_select" style="position: relative; cursor: pointer; user-select: none; width: 25%; margin-bottom: 1%; height: 100%; border: 1px solid grey; background-color: #E9ECEF;">
+            <p id="current_floor" style="margin: 0; width: 100%; height: 100%;">Test</p>
+            <i style="position: absolute; color: grey; right: 5%; top: 20%;" class="fas fa-caret-down"></i>
+        </div>
+    </div>
+    <div id="floors" class="hidden" style="top: 30%; position: absolute; width: 25%; background-color: white; border-left: 1px solid grey; border-bottom: 1px solid grey; border-right: 1px solid grey;">
+
+    </div>
+    <div style="width: 100%; height: 68%; position: relative; display: flex; flex-wrap: wrap;">
+
+            @for (int i = 0; i < 10; i++)
+            {
+                    @for (int j = 0; j < 10; j++)
+                    {
+                        <div class="building_map" row="@i" col="@j" style="width: 10%; height: 10%;"><svg style="width: 100%; height: 100%;"><line class="line" style="display: none;" data-orientation="upper" x1="0" x2="100%" y1="0" y2="0" stroke="black" stroke-width="5px" /><line class="line" style="display: none;" data-orientation="left" x1="0" x2="0" y1="0" y2="100%" stroke="black" stroke-width="5px" /></svg></div>
+                    }
+            }
+    </div>
+</div>
+
+<script>
+    $('#toolbox_wall, #toolbox_desk, #toolbox_chair').mouseenter(function () {
+        item = $(this);
+        if (!$(this).is(':animated')) {
+            $(this).animate({
+                backgroundColor: "#A1A9A8"
+
+            });
+        }
+    });
+    $('#toolbox_wall, #toolbox_desk, #toolbox_chair').mouseleave(function () {
+        $(this).animate({
+            backgroundColor: "#FFFFFF"
+        });
+    });
+    $('#toolbox_wall, #toolbox_desk, #toolbox_chair').mousedown(function (e) {
+        //<i style="width: 100%; margin-top: 25%; text-align: center;" class="fas fa-chair fa-3x" aria-hidden="true"></i>
+        var icon = document.createElement('i');
+        icon.className = $(this).find('i').attr('class');
+        icon.style.position = "absolute";
+        icon.style.pointerEvents = "none";
+        icon.id = "created_icon";
+        document.querySelector('body').appendChild(icon);
+        icon.style.top = e.pageY - icon.offsetHeight / 2 + "px";
+        icon.style.left = e.pageX - icon.offsetWidth / 2 + "px";
+        $(icon).data('item', $(this).index());
+        $('line').css('stroke', 'green').css('display', '');
+    });
+    $('html').mousemove(function (e) {
+        if ($('#created_icon').length != 0)
+            $('#created_icon').css("top", e.pageY - $('#created_icon').outerHeight() / 2 + "px").css("left", e.pageX - $('#created_icon').outerWidth() / 2 + "px");
+
+    })
+    $('html').mouseup(function (e) {
+        if ($('#created_icon').length != 0) {
+            console.log(e.target.className)
+            if (e.target.className == "line")
+                $('line').addClass('added');
+            $('line:not(.added)').css('stroke-width', '5px').css('stroke', 'black').css('display', 'none');
+            document.getElementById("created_icon").remove();
+        }
+    });
+    $('line').mouseenter(function () {
+
+        if ($('#created_icon').length != 0) {
+            $(this).css('stroke', "black");
+            $(this).css('stroke-width', "10px");
+            $('#created_icon').css('display', 'none');
+        }
+    });
+    $('line').mouseleave(function () {
+        if ($('#created_icon').length != 0) {
+            $(this).css('stroke', "green");
+            $(this).css('stroke-width', "5px");
+            $('#created_icon').css('display', '');
+        }
+    });
+    $('#month_select').on('click', function () {
+        $('#months').toggleClass('hidden');
+    });
+    $(".dropdown-element").mouseenter(function () {
+        if (!$(this).hasClass('error'))
+            $(this).css('background-color', '#4C8BF5');
+    });
+    $(".dropdown-element").mouseleave(function () {
+        if (!$(this).hasClass('error'))
+            $(this).css('background-color', '');
+    });
+    $("#profile_pic_select").change(function () {
+        var input = this;
+        if (input.files && input.files[0]) {
+            var filesize = ((input.files[0].size / 1024) / 1024).toFixed(4); // MB
+            if (filesize > 5) {
+                alert("Eroare! Imaginile mai mari de 5MB nu sunt acceptate!");
+            }
+            else {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $("#profile_pic").attr("src", e.target.result);
+                    $.ajax({
+                        url: "/",
+                        method: "POST",
+                        data: { "uid": "@ViewBag.uid", "change_profile_pic": e.target.result }
+                    });
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    });
+</script>
