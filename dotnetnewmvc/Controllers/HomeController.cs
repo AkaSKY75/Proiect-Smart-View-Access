@@ -204,7 +204,27 @@ namespace dotnetnewmvc.Controllers
                 StringContent content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
                 string response = SendHttpRequest("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Angajat/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "POST");
                 JToken jresponse = JObject.Parse(response)["name"];
-                return Json(new { Message = jresponse.ToString() });
+                return Json(new { Message = jresponse.ToString().Substring(62) });
+            }
+            else if(form["search_email"].ToString() != "")
+            {
+                string message = "success";
+                string values = "{ \"structuredQuery\": { \"select\": {\"fields\": [{\"fieldPath\": \"name\"}]}, \"from\": [{\"collectionId\": \"Angajat\"}], \"where\": {\"fieldFilter\": {\"field\": {\"fieldPath\": \"email\"}, \"op\": \"EQUAL\", \"value\": {\"stringValue\": \"" + form["search_email"] + "\"}}}}}";
+                JObject json = JObject.Parse(values);
+                StringContent content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                string response = SendHttpRequest("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents:runQuery?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "POST");
+                IEnumerable<JToken> jresponse = JArray.Parse(response).Children()["document"];
+                if (jresponse.Count() != 0)
+                    message = "error";
+                values = "{ \"structuredQuery\": { \"select\": {\"fields\": [{\"fieldPath\": \"name\"}]}, \"from\": [{\"collectionId\": \"Angajat\"}], \"where\": {\"fieldFilter\": {\"field\": {\"fieldPath\": \"email_firma\"}, \"op\": \"EQUAL\", \"value\": {\"stringValue\": \"" + form["search_email"] + "\"}}}}}";
+                json = JObject.Parse(values);
+                content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                response = SendHttpRequest("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents:runQuery?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "POST");
+                jresponse = JArray.Parse(response).Children()["document"];
+                if (jresponse.Count() != 0)
+                    message = "error";
+                return Json(new { Message = message });
+
             }
             else if(form["update_user"].ToString() != "" && form["field_name"].ToString() != "" && form["field_value"].ToString() != "")
             {
@@ -232,14 +252,11 @@ namespace dotnetnewmvc.Controllers
                     case "loc": type = "integerValue";
                                 break;
                 }
-                string values;
-                if((form["field_name"] == "numar_inmatriculare" || form["field_name"] == "email") && form["field_value"] == "-")
-                    values = "{ \"fields\": { \""+form["field_name"]+"\": {\"" + type + "\": \"\"}}}";
-                else
-                    values = "{ \"fields\": { \"" + form["field_name"] + "\": {\"" + type + "\": \"" + form["field_value"].ToString() + "\"}}}";
+                string values = "{ \"fields\": { \"" + form["field_name"] + "\": {\"" + type + "\": \"" + form["field_value"].ToString() + "\"}}}";
                 JObject json = JObject.Parse(values);
                 StringContent content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
                 string response = SendHttpRequest("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Angajat/" + form["update_user"].ToString() + "?updateMask.fieldPaths="+form["field_name"]+"&key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "PATCH");
+                Debug.WriteLine(response);
                 return Json(new { Message = "success" });
             }
             else if(form["uid"].ToString() != "" && form["administrator_menu_item"].ToString() != "")
@@ -296,7 +313,29 @@ namespace dotnetnewmvc.Controllers
                                 ViewBag.Iesiri = iesiri;
                                 ViewBag.Ore = ore;
                                 return View("Administrator_Menu_1");
-                    case "2":   return View("Administrator_Menu_2");
+                    case "2":   values = "{ \"structuredQuery\": {\"select\": {\"fields\": [{\"fieldPath\": \"index\"}, {\"fieldPath\": \"name\"}]}, \"orderBy\": [{\"direction\": \"ASCENDING\", \"field\": {\"fieldPath\": \"index\"}}], \"from\": [{\"collectionId\": \"Etaj\"}]}}";
+                                json = JObject.Parse(values);
+                                content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                                response = SendHttpRequest("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Cladire/Cladire_SmartView:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "POST");
+                                jresponse = JArray.Parse(response).Children()["document"];
+                                List<string> etaje = new List<string>();
+                                List<string> etaje_ids = new List<string>();
+                                List<string> birouri = new List<string>();
+                                List<string> birouri_ids = new List<string>();
+                                List<string> locuri = new List<string>();
+                                for (int i = 0; i < jresponse.Count(); i++)
+                                {
+                                    etaje.Add(jresponse.ElementAt(i)["fields"]["index"]["integerValue"].ToString());
+                                    etaje_ids.Add(jresponse.ElementAt(i)["name"].ToString());
+                                }
+
+                                ViewBag.Etaje = etaje;
+                                ViewBag.Etaje_ids = etaje_ids;
+                                ViewBag.Birouri = birouri;
+                                ViewBag.Birouri_ids = birouri_ids;
+                                ViewBag.Locuri = locuri;
+                                //return View();
+                                return View("Administrator_Menu_2");
                     case "3":   values = "{ \"structuredQuery\": {\"select\": {\"fields\": [{\"fieldPath\": \"cnp\"}, {\"fieldPath\": \"email\"}, {\"fieldPath\": \"email_firma\"}, {\"fieldPath\": \"nume\"}, {\"fieldPath\": \"prenume\"}, {\"fieldPath\": \"numar_inmatriculare\"}, {\"fieldPath\": \"departament\"}, {\"fieldPath\": \"etaj\"}, {\"fieldPath\": \"birou\"}, {\"fieldPath\": \"loc\"}]}, \"from\": [{\"collectionId\": \"Angajat\"}]}}";
                                 json = JObject.Parse(values);
                                 content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
@@ -317,17 +356,11 @@ namespace dotnetnewmvc.Controllers
                                 {
                                     ids.Add(jresponse.ElementAt(i)["name"].ToString().Substring(62));
                                     cnp.Add(jresponse.ElementAt(i)["fields"]["cnp"]["stringValue"].ToString());
-                                    if (jresponse.ElementAt(i)["fields"]["email"]["stringValue"].ToString() != "")
-                                        email.Add(jresponse.ElementAt(i)["fields"]["email"]["stringValue"].ToString());
-                                    else
-                                        email.Add("-");
+                                    email.Add(jresponse.ElementAt(i)["fields"]["email"]["stringValue"].ToString());
                                     email_firma.Add(jresponse.ElementAt(i)["fields"]["email_firma"]["stringValue"].ToString());
                                     nume.Add(jresponse.ElementAt(i)["fields"]["nume"]["stringValue"].ToString());
                                     prenume.Add(jresponse.ElementAt(i)["fields"]["prenume"]["stringValue"].ToString());
-                                    if (jresponse.ElementAt(i)["fields"]["numar_inmatriculare"]["stringValue"].ToString() != "")
-                                        numar_inmatriculare.Add(jresponse.ElementAt(i)["fields"]["numar_inmatriculare"]["stringValue"].ToString());
-                                    else
-                                        numar_inmatriculare.Add("-");
+                                    numar_inmatriculare.Add(jresponse.ElementAt(i)["fields"]["numar_inmatriculare"]["stringValue"].ToString());
                                     departament.Add(jresponse.ElementAt(i)["fields"]["departament"]["stringValue"].ToString());
                                     etaj.Add(jresponse.ElementAt(i)["fields"]["etaj"]["integerValue"].ToString());
                                     birou.Add(jresponse.ElementAt(i)["fields"]["birou"]["integerValue"].ToString());

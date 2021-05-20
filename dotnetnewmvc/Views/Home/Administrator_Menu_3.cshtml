@@ -145,7 +145,7 @@
         }
         else if (index == 1 || index == 2) {
             var accepted = "abcdefghijklmnopqrstuvwxyz0123456789 .!#$%&'*+-/=?^_`{|}~@@";
-            if (input.parent().parent().hasClass("create") && value.length == 0) {
+            if (!input.parent().parent().hasClass("create") && value.length == 0) {
                 if (index == 2) {
                     input.addClass('error');
                     error_msg = "Câmpul nu poate fi vid.";
@@ -173,8 +173,21 @@
                         error_msg = 'Formatul emailului dat nu respectă șablonul "email@@domeniu.subdomeniu"';
                     }
                     else {
-                        input.removeClass('error');
-                        error_msg = "";
+                        $.ajax({
+                            url: "/",
+                            method: "POST",
+                            data: { "search_email": value },
+                            success: function (data) {
+                                if (data["message"] == "error") {
+                                    input.addClass('error');
+                                    error_msg = 'Emailul inserat a fost deja atribuit unui angajat.';
+                                }
+                                else {
+                                    input.removeClass('error');
+                                    error_msg = "";
+                                }
+                            }
+                        });
                     }
                 }
             }
@@ -266,12 +279,12 @@
             div.style.left = "37.5%";
             div.style.right = "37.5%";
             div.style.zIndex = "2";
-            if (input.parent().index() == 1)
-                div.innerHTML = "<p style='width: 100%; text-align: justify;'>&emsp;Sunteți sigur/ă că doriți să modificați câmpul " + $('tr').eq(0).find('th').eq(input.parent().index()).text() + " pentru angajatul/a " + last_value + " " + input.parent().parent().find('td').eq(2).find('input').val() + "?</p>"
-            else if (input.parent().index() == 2)
-                div.innerHTML = "<p style='width: 100%; text-align: justify;'>&emsp;Sunteți sigur/ă că doriți să modificați câmpul " + $('tr').eq(0).find('th').eq(input.parent().index()).text() + " pentru angajatul/a " + input.parent().parent().find('td').eq(1).find('input').val() + " " + last_value + "?</p>"
+            if (input.parent().index() == 3)
+                div.innerHTML = "<p style='width: 100%; text-align: justify;'>&emsp;Sunteți sigur/ă că doriți să modificați câmpul " + $('tr').eq(0).find('th').eq(input.parent().index()).text() + " pentru angajatul/a " + last_value + " " + input.parent().parent().find('td').eq(4).find('input').val() + "?</p>"
+            else if (input.parent().index() == 4)
+                div.innerHTML = "<p style='width: 100%; text-align: justify;'>&emsp;Sunteți sigur/ă că doriți să modificați câmpul " + $('tr').eq(0).find('th').eq(input.parent().index()).text() + " pentru angajatul/a " + input.parent().parent().find('td').eq(3).find('input').val() + " " + last_value + "?</p>"
             else
-                div.innerHTML = "<p style='width: 100%; text-align: justify;'>&emsp;Sunteți sigur/ă că doriți să modificați câmpul " + $('tr').eq(0).find('th').eq(input.parent().index()).text() + " pentru angajatul/a " + input.parent().parent().find('td').eq(1).find('input').val() + " " + input.parent().parent().find('td').eq(2).find('input').val() + "?</p>"
+                div.innerHTML = "<p style='width: 100%; text-align: justify;'>&emsp;Sunteți sigur/ă că doriți să modificați câmpul " + $('tr').eq(0).find('th').eq(input.parent().index()).text() + " pentru angajatul/a " + input.parent().parent().find('td').eq(3).find('input').val() + " " + input.parent().parent().find('td').eq(4).find('input').val() + "?</p>"
             button = document.createElement('input');
             button.type = "button";
             button.className = "btn btn-success";
@@ -284,10 +297,18 @@
                 var divs = document.querySelectorAll('.safety_check');
                 divs[0].remove();
                 divs[1].remove();
+                var field_name;
+                var field_value;
+                field_name = input.data("field");
+                field_value = input.val();
+                if (field_name == "numar_inmatriculare" || field_name == "email") {
+                    if (input.val() == "-")
+                        field_value = "";
+                }
                 $.ajax({
                     url: "/",
                     method: "POST",
-                    data: { "update_user": input.parent().parent().data('id'), "field_name": input.data("field"), "field_value": input.val() }
+                    data: { "update_user": input.parent().parent().data('id'), "field_name": field_name, "field_value": field_value }
                 });
             });
             div.appendChild(button);
@@ -405,6 +426,7 @@
                             var tr = document.createElement('tr');
                             var td;
                             var input;
+                            var fields = ["cnp", "email", "email_firma", "nume", "prenume", "numar_inmatriculare", "departament", "etaj", "birou", "loc"]
                             tr.className = "create";
                             for (var i = 0; i < 10; i++) {
                                 td = document.createElement('td');
@@ -413,6 +435,7 @@
                                 input.style.outline = "none";
                                 input.style.border = "0";
                                 input.style.textAlign = "center";
+                                input.dataset.field = fields[i];
                                 $(input).on("click", function () {
                                     input_click($(this));
                                 });
