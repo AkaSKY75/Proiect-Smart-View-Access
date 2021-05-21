@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -45,7 +46,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                     ),
                     Container(
                       color: Colors.grey[300],
-                      child: model.imagePicked == null
+                      child: model.avatar == null
                           ? IconButton(
                               onPressed: () async {
                                 showAlertDialogOwn(() async {
@@ -70,13 +71,19 @@ class ProfileScreenState extends State<ProfileScreen> {
                                   await model.uploadAvatar();
                                 }, context);
                               },
-                              child: Image.file(
-                                model.imagePicked,
-                                width: 100,
-                                height: 100,
-                                fit: BoxFit.fill,
-                              ),
-                            ),
+                              child: model.avatar == null
+                                  ? Image.file(
+                                      model.imagePicked,
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.fill,
+                                    )
+                                  : CachedNetworkImage(
+                                      imageUrl: model.avatar,
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.fill,
+                                    )),
                     ),
                     SizedBox(
                       width: 20,

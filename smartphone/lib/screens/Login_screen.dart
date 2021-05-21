@@ -4,7 +4,6 @@ import 'package:smartphone/screens/Profile_screen.dart';
 import 'package:smartphone/view_models/login_viewModel.dart';
 import 'package:stacked/stacked.dart';
 
-
 class Login extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -21,12 +20,14 @@ class Login extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Spacer(),
-              Image(
-                width: 300,
-                height: 300,
-                alignment: Alignment.bottomRight,
-                image: NetworkImage(
-                    'https://cdn.discordapp.com/attachments/814426440308752449/814460660569735199/1.png'),
+              Expanded(
+                child: Image(
+                  width: 300,
+                  height: 300,
+                  alignment: Alignment.bottomRight,
+                  image: NetworkImage(
+                      'https://cdn.discordapp.com/attachments/814426440308752449/814460660569735199/1.png'),
+                ),
               ),
               Container(
                 width: 400,
@@ -60,6 +61,7 @@ class Login extends StatelessWidget {
                 width: 400,
                 decoration: BoxDecoration(color: Colors.grey[100]),
                 child: TextFormField(
+                  obscureText: true,
                   controller: passwordController,
                   style: GoogleFonts.montserrat(
                     fontSize: 15.5,

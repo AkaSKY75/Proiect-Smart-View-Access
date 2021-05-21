@@ -48,6 +48,6 @@ class ProfileServices {
       print("Error adding document: " + error);
     }
 
-    AngajatDataModel.fromMap({}, getDownloadedImageUrl,uid);
+    AngajatDataModel.fromMap({}, getDownloadedImageUrl, uid);
   }
 }
