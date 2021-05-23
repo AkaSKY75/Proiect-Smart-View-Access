@@ -134,7 +134,7 @@ namespace dotnetnewmvc
             else if (bytes[0] == 1 && bytes[1] == 1)
             {
                 HttpClient http = new HttpClient();
-                string query = "{\"structuredQuery\": { \"select\": {\"fields\": [{\"fieldPath\": \"locuri_parcare_ocupate\"}]}, \"from\": [{ \"collectionId\": \"Cladire\" }]}}";
+                string query = "{\"structuredQuery\": { \"select\": {\"fields\": [{\"fieldPath\": \"locuri_parcare_ocupate\"}, {\"fieldPath\": \"locuri_parcare_max\"}]}, \"from\": [{ \"collectionId\": \"Cladire\" }]}}";
                 JObject json = JObject.Parse(query);
                 StringContent content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
                 string response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
@@ -146,6 +146,13 @@ namespace dotnetnewmvc
                     json = JObject.Parse(query);
                     content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
                     response = await http.PatchAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Cladire/Cladire_SmartView?updateMask.fieldPaths=locuri_parcare_ocupate&key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                    bytes = Encoding.ASCII.GetBytes(locuri.ToString()+'\0'+jresponse.First()["fields"]["locuri_parcare_max"]["integerValue"].ToString()+'\0'+"##");
+                    checksum = 0;
+                    for (i = 0; i < bytes.Length - 2; i++)
+                        checksum += i;
+                    bytes[bytes.Length - 2] = (byte)(checksum >> 8);
+                    bytes[bytes.Length - 1] = (byte)(checksum & 0xFF);
+                    await stream.WriteAsync(bytes);
                 }
             }
             /*   Device is 2 and command to execute is 0 => Scenario when Smartphone asks for the current datetime from Cloud   */

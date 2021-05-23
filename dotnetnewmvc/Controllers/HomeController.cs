@@ -200,6 +200,14 @@ namespace dotnetnewmvc.Controllers
                 byte[] password = new byte[10];
                 for (int i = 0; i < 10; i++)
                     password[i] = chars[rnd.Next(chars.Length)];
+                SHA256 sha = SHA256.Create();
+                byte[] result;
+                StringBuilder builder = new StringBuilder();
+                result = sha.ComputeHash(password);
+                for (int i = 0; i < result.Length; i++)
+                {
+                    builder.Append(result[i].ToString("x2"));
+                }
                 string values = "{ \"fields\": { \"email\": {\"stringValue\": \"" + form["insert_user_email"].ToString() + "\"}, \"email_firma\": {\"stringValue\": \"" + form["insert_user_email_firma"].ToString() + "\"}, \"avatar\":{\"stringValue\":\"\"}, \"parola\":{\"stringValue\":\"" + Encoding.ASCII.GetString(password)+"\"}, \"cnp\": {\"stringValue\": \"" + form["insert_user_cnp"].ToString() + "\"}, \"nume\": {\"stringValue\": \"" + form["insert_user_nume"].ToString() + "\"}, \"prenume\": {\"stringValue\": \"" + form["insert_user_prenume"].ToString() + "\"}, \"numar_inmatriculare\": {\"stringValue\": \"" + form["insert_user_numar_inmatriculare"].ToString() + "\"}, \"departament\": {\"stringValue\": \"" + form["insert_user_departament"].ToString() + "\"}, \"etaj\": {\"integerValue\": \"" + form["insert_user_etaj"].ToString() + "\"}, \"birou\": {\"integerValue\": \"" + form["insert_user_birou"].ToString() + "\"}, \"loc\": {\"integerValue\": \"" + form["insert_user_loc"].ToString() + "\"}}}";
                 JObject json = JObject.Parse(values);
                 StringContent content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
@@ -368,16 +376,7 @@ namespace dotnetnewmvc.Controllers
                                 ViewBag.Iesiri = iesiri;
                                 ViewBag.Ore = ore;
                                 return View("Administrator_Menu_1");
-                    case "2":   SHA256 sha = SHA256.Create();
-                                byte[] result;
-                                byte[] bytes = new byte[] { 49, 50, 51, 52, 53, 54, 55, 56, 57 };
-                                StringBuilder builder = new StringBuilder();
-                                result = sha.ComputeHash(bytes);
-                                for (int i = 0; i < result.Length; i++)
-                                {
-                                    builder.Append(result[i].ToString("x2"));
-                                }
-                                Debug.WriteLine(builder);
+                    case "2":   
                                 values = "{ \"structuredQuery\": {\"select\": {\"fields\": [{\"fieldPath\": \"index\"}]}, \"from\": [{\"collectionId\": \"Etaj\"}], \"orderBy\": [{\"field\": {\"fieldPath\": \"index\"}, \"direction\": \"ASCENDING\"}]}}";
                                 json = JObject.Parse(values);
                                 content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
