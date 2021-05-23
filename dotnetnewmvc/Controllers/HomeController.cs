@@ -15,6 +15,7 @@ using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using System.Text;
 using Newtonsoft.Json;
+using System.Security.Cryptography;
 
 namespace dotnetnewmvc.Controllers
 {
@@ -204,7 +205,29 @@ namespace dotnetnewmvc.Controllers
                 StringContent content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
                 string response = SendHttpRequest("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Angajat/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "POST");
                 JToken jresponse = JObject.Parse(response)["name"];
-                return Json(new { Message = jresponse.ToString().Substring(62) });
+                string uid = jresponse.ToString().Substring(62);
+                values = "{ \"email\": \""+form["insert_user_email_firma"]+"\", \"password\":\""+Encoding.ASCII.GetString(password)+"\", \"returnSecureToken\": \"true\"}";
+                json = JObject.Parse(values);
+                content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                response = SendHttpRequest("https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "POST");
+                jresponse = JObject.Parse(response)["localId"];
+                values = "{ \"fields\": {\"id\": {\"referenceValue\": \"projects/smartviewacces/databases/(default)/documents/Anagajat/" + uid + "\"}}}";
+                json = JObject.Parse(values);
+                content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                response = SendHttpRequest("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Auth?documentId="+jresponse.ToString()+"&key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "POST");
+                if(form["insert_user_email"].ToString() != "")
+                {
+                    values = "{ \"email\": \"" + form["insert_user_email"] + "\", \"password\":\"" + Encoding.ASCII.GetString(password) + "\", \"returnSecureToken\": \"true\"}";
+                    json = JObject.Parse(values);
+                    content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                    response = SendHttpRequest("https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "POST");
+                    jresponse = JObject.Parse(response)["localId"];
+                    values = "{ \"fields\": {\"id\": {\"referenceValue\": \"projects/smartviewacces/databases/(default)/documents/Anagajat/" + uid + "\"}}}";
+                    json = JObject.Parse(values);
+                    content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                    response = SendHttpRequest("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Auth?documentId=" + jresponse.ToString() + "&key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "POST");
+                }
+                return Json(new { Message = uid });
             }
             else if(form["search_email"].ToString() != "")
             {
@@ -252,12 +275,44 @@ namespace dotnetnewmvc.Controllers
                     case "loc": type = "integerValue";
                                 break;
                 }
-                string values = "{ \"fields\": { \"" + form["field_name"] + "\": {\"" + type + "\": \"" + form["field_value"].ToString() + "\"}}}";
+                string values;
+                JObject json;
+                StringContent content;
+                string response;
+                values = "{ \"fields\": { \"" + form["field_name"] + "\": {\"" + type + "\": \"" + form["field_value"].ToString() + "\"}}}";
+                json = JObject.Parse(values);
+                content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                response = SendHttpRequest("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Angajat/" + form["update_user"].ToString() + "?updateMask.fieldPaths="+form["field_name"]+"&key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "PATCH");
+                
+                return Json(new { Message = "success" });
+            }
+            else if(form["floor_update"].ToString() != "" && form["walls"].ToString() != "")
+            {
+                string id = "";
+                string values = "{ \"structuredQuery\": { \"from\":[{\"collectionId\":\"Etaj\"}], \"where\": {\"fieldFilter\": {\"field\":{\"fieldPath\": \"index\"}, \"op\":\"EQUAL\", \"value\": {\"integerValue\":\"" + form["floor_update"] + "\"}}}}}";
                 JObject json = JObject.Parse(values);
                 StringContent content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-                string response = SendHttpRequest("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Angajat/" + form["update_user"].ToString() + "?updateMask.fieldPaths="+form["field_name"]+"&key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "PATCH");
-                Debug.WriteLine(response);
-                return Json(new { Message = "success" });
+                string response = SendHttpRequest("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Cladire/Cladire_SmartView:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "POST");
+                IEnumerable<JToken> jresponse = JArray.Parse(response).Children()["document"];
+                if (jresponse.Count() == 0)
+                {
+                    values = "{ \"fields\": { \"index\": {\"integerValue\": \"" + form["floor_update"].ToString() + "\"}, {\"pereti\":{\"stringValue\":\"\"}}}}";
+                    json = JObject.Parse(values);
+                    content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                    response = SendHttpRequest("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Cladire/Cladire_SmartView/Etaj/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "POST");
+                    Debug.WriteLine(response);
+                    id = JObject.Parse(response)["name"].ToString();
+                }
+                else
+                    id = jresponse.First()["name"].ToString();
+                values = "{ \"fields\": { \"pereti\": {\"stringValue\": \"" + form["walls"].ToString() + "\"}}}";
+
+                json = JObject.Parse(values);
+                content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                //Debug.WriteLine(id);
+                response = SendHttpRequest("https://firestore.googleapis.com/v1/" + id + "?updateMask.fieldPaths=pereti&key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "PATCH");
+                //Debug.WriteLine(response);
+
             }
             else if(form["uid"].ToString() != "" && form["administrator_menu_item"].ToString() != "")
             {
@@ -313,7 +368,26 @@ namespace dotnetnewmvc.Controllers
                                 ViewBag.Iesiri = iesiri;
                                 ViewBag.Ore = ore;
                                 return View("Administrator_Menu_1");
-                    case "2":   
+                    case "2":   SHA256 sha = SHA256.Create();
+                                byte[] result;
+                                byte[] bytes = new byte[] { 49, 50, 51, 52, 53, 54, 55, 56, 57 };
+                                StringBuilder builder = new StringBuilder();
+                                result = sha.ComputeHash(bytes);
+                                for (int i = 0; i < result.Length; i++)
+                                {
+                                    builder.Append(result[i].ToString("x2"));
+                                }
+                                Debug.WriteLine(builder);
+                                values = "{ \"structuredQuery\": {\"select\": {\"fields\": [{\"fieldPath\": \"index\"}]}, \"from\": [{\"collectionId\": \"Etaj\"}], \"orderBy\": [{\"field\": {\"fieldPath\": \"index\"}, \"direction\": \"ASCENDING\"}]}}";
+                                json = JObject.Parse(values);
+                                content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                                response = SendHttpRequest("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Cladire/Cladire_SmartView:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content, "POST");
+                                jresponse = JArray.Parse(response).Children()["document"];
+                                List<string> etaje = new List<string>();
+                                for (int i = 0; i < jresponse.Count(); i++)
+                                    etaje.Add(jresponse.ElementAt(i)["name"].ToString().Substring(85));
+                                values = "{ \"structuredQuery\": {\"select\": {\"fields\": [{\"fieldPath\": \"pereti\"}]}, \"from\": [{\"collectionId\": \"Etaj\"}], \"where\": {\"fieldFilter\":{\"field\":{\"fieldPath\": \"__name__\"}}}}}";
+                                ViewBag.Etaje = etaje;
                                 //jresponse = JArray.Parse(response).Children()["document"];
                                 /*List<string> etaje = new List<string>();
                                 List<string> etaje_ids = new List<string>();

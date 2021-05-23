@@ -42,13 +42,12 @@ namespace dotnetnewmvc
             ushort checksum;
             byte[] bytes = new byte[515];
             await stream.ReadAsync(bytes, 0, 2);
-            Debug.WriteLine(bytes[0] + " " + bytes[1]);
             /*   Device is 1 and command to execute is 0 => Scenario when Raspberry PI send a carplate number to be checked in the database   */
-            if(bytes[0] == 1 && bytes[1] == 0)
-            {                
+            if (bytes[0] == 1 && bytes[1] == 0)
+            {
                 i = 2;
                 await stream.ReadAsync(bytes, i, 1);
-                while(bytes[i] != 0)
+                while (bytes[i] != 0)
                 {
                     i++;
                     await stream.ReadAsync(bytes, i, 1);
@@ -56,14 +55,14 @@ namespace dotnetnewmvc
                 i++;
                 await stream.ReadAsync(bytes, i, 2);
                 checksum = 0;
-                for(k = 0; k < i-1; k++)
+                for (k = 0; k < i - 1; k++)
                 {
                     checksum += bytes[k];
                 }
-                if(checksum == ((((ushort)(bytes[i])) << 8) | bytes[i+1]))
+                if (checksum == ((((ushort)(bytes[i])) << 8) | bytes[i + 1]))
                 {
                     HttpClient http = new HttpClient();
-                    string query = "{\"structuredQuery\": { \"select\": {\"fields\": [{\"fieldPath\": \"name\"}]}, \"from\": [{ \"collectionId\": \"Angajat\" }], \"where\": { \"fieldFilter\": {\"field\": {\"fieldPath\": \"numar_inmatriculare\"}, \"op\": \"EQUAL\", \"value\": {\"stringValue\": \""+Encoding.ASCII.GetString(bytes, 2, i-3)+"\"}}}}}";
+                    string query = "{\"structuredQuery\": { \"select\": {\"fields\": [{\"fieldPath\": \"name\"}]}, \"from\": [{ \"collectionId\": \"Angajat\" }], \"where\": { \"fieldFilter\": {\"field\": {\"fieldPath\": \"numar_inmatriculare\"}, \"op\": \"EQUAL\", \"value\": {\"stringValue\": \"" + Encoding.ASCII.GetString(bytes, 2, i - 3) + "\"}}}}}";
                     JObject json = JObject.Parse(query);
                     StringContent content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
                     string response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
@@ -74,31 +73,49 @@ namespace dotnetnewmvc
                     }
                     else
                     {
-                        await stream.WriteAsync(new byte[] { 0 });
                         string id = jresponse.First()["name"].ToString();
-                        string path;
-                        query = "{\"structuredQuery\": { \"select\": {\"fields\": [{\"fieldPath\": \"name\"}]}, \"from\": [{ \"collectionId\": \"Parcare\" }], \"where\": { \"fieldFilter\": {\"field\": {\"fieldPath\": \"data\"}, \"op\": \"EQUAL\", \"value\": {\"stringValue\": \"" + DateTime.Today.ToString("yyyyMMdd") + "000000" + "\"}}}}}";
+                        query = "{\"structuredQuery\": { \"select\": {\"fields\": [{\"fieldPath\": \"locuri_parcare_ocupate\"}, {\"fieldPath\": \"locuri_parcare_max\"}]}, \"from\": [{ \"collectionId\": \"Cladire\" }]}}";
                         json = JObject.Parse(query);
                         content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
                         response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                        //Debug.WriteLine(response);
                         jresponse = JArray.Parse(response).Children()["document"];
-                        if (jresponse.Count() == 0) // First carplate number of new day
+                        if (jresponse.First()["fields"]["locuri_parcare_ocupate"]["integerValue"].ToString() == jresponse.First()["fields"]["locuri_parcare_max"]["integerValue"].ToString())
                         {
-                            query = "{ \"fields\": { \"data\": {\"stringValue\": \"" + DateTime.Today.ToString("yyyyMMdd") + "000000" + "\"}}}";
-                            json = JObject.Parse(query);
-                            content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-                            response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Parcare/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
-                            //Debug.WriteLine(response);
-                            path = JObject.Parse(response)["name"].ToString();
-                            //Debug.WriteLine(path);
+                            // All the free parking lots are occupied
+                            await stream.WriteAsync(new byte[] { 1 });
+
                         }
                         else
-                            path = jresponse.First()["name"].ToString();
-                        path = path.Substring(path.LastIndexOf('/')+1);
-                        query = "{ \"fields\": { \"id\": {\"referenceValue\": \"" + id + "\"}}}";
-                        json = JObject.Parse(query);
-                        content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-                        response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Parcare/"+path+ "/Masini?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                        {
+                            await stream.WriteAsync(new byte[] { 0 });
+                            query = "{ \"fields\": { \"locuri_parcare_ocupate\": {\"integerValue\": \"" + (Convert.ToInt32(jresponse.First()["fields"]["locuri_parcare_ocupate"]["integerValue"].ToString()) + 1).ToString() + "\"}}}";
+                            json = JObject.Parse(query);
+                            content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                            response = await http.PatchAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Cladire/Cladire_SmartView?updateMask.fieldPaths=locuri_parcare_ocupate&key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                            Debug.WriteLine(response);
+                            string path;
+                            query = "{\"structuredQuery\": { \"select\": {\"fields\": [{\"fieldPath\": \"name\"}]}, \"from\": [{ \"collectionId\": \"Parcare\" }], \"where\": { \"fieldFilter\": {\"field\": {\"fieldPath\": \"data\"}, \"op\": \"EQUAL\", \"value\": {\"stringValue\": \"" + DateTime.Today.ToString("yyyyMMdd") + "000000" + "\"}}}}}";
+                            json = JObject.Parse(query);
+                            content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                            response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                            jresponse = JArray.Parse(response).Children()["document"];
+                            if (jresponse.Count() == 0) // First carplate number of new day
+                            {
+                                query = "{ \"fields\": { \"data\": {\"stringValue\": \"" + DateTime.Today.ToString("yyyyMMdd") + "000000" + "\"}}}";
+                                json = JObject.Parse(query);
+                                content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                                response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Parcare/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                                path = JObject.Parse(response)["name"].ToString();
+                            }
+                            else
+                                path = jresponse.First()["name"].ToString();
+                            path = path.Substring(path.LastIndexOf('/') + 1);
+                            query = "{ \"fields\": { \"id\": {\"referenceValue\": \"" + id + "\"}}}";
+                            json = JObject.Parse(query);
+                            content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                            response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Parcare/" + path + "/Masini?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                        }
                         //Debug.WriteLine(response);
                         /* To do: Check database for received number (bytes[0->i-2]) => Send 0 for access and 1 otherwise */
 
@@ -108,9 +125,27 @@ namespace dotnetnewmvc
 
                 }
                 else
-                {       
-                        /*   Data lost occured => Sending command   */
-                        await stream.WriteAsync(new byte[] { 2 });
+                {
+                    /*   Data lost occured => Sending command   */
+                    await stream.WriteAsync(new byte[] { 2 });
+                }
+            }
+            /*   Device is 1 and command to execute is 1 => Scenario when Raspberry detected 1 parking lot freed   */
+            else if (bytes[0] == 1 && bytes[1] == 1)
+            {
+                HttpClient http = new HttpClient();
+                string query = "{\"structuredQuery\": { \"select\": {\"fields\": [{\"fieldPath\": \"locuri_parcare_ocupate\"}]}, \"from\": [{ \"collectionId\": \"Cladire\" }]}}";
+                JObject json = JObject.Parse(query);
+                StringContent content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                string response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                IEnumerable<JToken> jresponse = JArray.Parse(response).Children()["document"];
+                int locuri = Convert.ToInt32(jresponse.First()["fields"]["locuri_parcare_ocupate"]["integerValue"].ToString());
+                if(locuri > 0)
+                {
+                    query = "{ \"fields\": { \"locuri_parcare_ocupate\": {\"integerValue\": \"" + (locuri - 1).ToString() + "\"}}}";
+                    json = JObject.Parse(query);
+                    content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                    response = await http.PatchAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Cladire/Cladire_SmartView?updateMask.fieldPaths=locuri_parcare_ocupate&key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
                 }
             }
             /*   Device is 2 and command to execute is 0 => Scenario when Smartphone asks for the current datetime from Cloud   */
@@ -205,58 +240,58 @@ namespace dotnetnewmvc
                 for (i = 0; i < 29; i++)
                     checksum += bytes[i];
                 //Debug.WriteLine(checksum);
-                if(checksum == (ushort)(bytes[29] << 8 | bytes[30]))
+                if (checksum == (ushort)(bytes[29] << 8 | bytes[30]))
                 {
-                        string cnp_datetime = Encoding.ASCII.GetString(bytes, 2, 27);
-                        //Debug.WriteLine(cnp_datetime);
-                        DateTime datetime = DateTime.ParseExact(cnp_datetime.Substring(13), "yyyyMMddHHmmss", System.Globalization.CultureInfo.InvariantCulture);
-                        if ((DateTime.Now - datetime).TotalMinutes >= 5)
-                        {
+                    string cnp_datetime = Encoding.ASCII.GetString(bytes, 2, 27);
+                    //Debug.WriteLine(cnp_datetime);
+                    DateTime datetime = DateTime.ParseExact(cnp_datetime.Substring(13), "yyyyMMddHHmmss", System.Globalization.CultureInfo.InvariantCulture);
+                    if ((DateTime.Now - datetime).TotalMinutes >= 5)
+                    {
+                        await stream.WriteAsync(new byte[] { 1 });
+                    }
+                    else
+                    {
+                        HttpClient http = new HttpClient();
+                        /* Search the given CNP in the database */
+                        string values = "{ \"structuredQuery\": { \"select\": {\"fields\": [{\"fieldPath\": \"name\"}]}, \"from\": [{\"collectionId\": \"Angajat\"}], \"where\": {\"fieldFilter\": {\"field\": {\"fieldPath\": \"cnp\"}, \"op\":\"EQUAL\", \"value\": {\"stringValue\":\"" + cnp_datetime.Substring(0, 13) + "\"}}}}}";
+                        JObject json = JObject.Parse(values);
+                        StringContent content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                        string response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                        //Debug.WriteLine(response);
+                        IEnumerable<JToken> jresponse = JArray.Parse(response).Children()["document"];
+                        if (jresponse.Count() == 0) // CNP doesn't exist in the database
                             await stream.WriteAsync(new byte[] { 1 });
-                        }
                         else
                         {
-                            HttpClient http = new HttpClient();
-                            /* Search the given CNP in the database */
-                            string values = "{ \"structuredQuery\": { \"select\": {\"fields\": [{\"fieldPath\": \"name\"}]}, \"from\": [{\"collectionId\": \"Angajat\"}], \"where\": {\"fieldFilter\": {\"field\": {\"fieldPath\": \"cnp\"}, \"op\":\"EQUAL\", \"value\": {\"stringValue\":\"" + cnp_datetime.Substring(0, 13) + "\"}}}}}";
-                            JObject json = JObject.Parse(values);
-                            StringContent content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-                            string response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
-                            //Debug.WriteLine(response);
-                            IEnumerable<JToken> jresponse = JArray.Parse(response).Children()["document"];
-                            if (jresponse.Count() == 0) // CNP doesn't exist in the database
-                                await stream.WriteAsync(new byte[] { 1 });
+                            await stream.WriteAsync(new byte[] { 0 });
+
+                            string id = jresponse.First()["name"].ToString().Substring(jresponse.First()["name"].ToString().LastIndexOf('/') + 1);
+
+                            /* Get all entries starting form 12PM from the current day having id same as employer*/
+                            values = "{ \"structuredQuery\": { \"where\": {\"compositeFilter\": { \"op\": \"AND\", \"filters\": [{ \"fieldFilter\": {\"field\": {\"fieldPath\": \"id\"}, \"op\": \"EQUAL\", \"value\": {\"referenceValue\": \"projects/smartviewacces/databases/(default)/documents/Angajat/" + id + "\"}}}, { \"fieldFilter\": {\"field\": {\"fieldPath\": \"Iesire\"}, \"op\": \"EQUAL\", \"value\": {\"stringValue\": \"-1\"}}}]}}, \"from\": [{\"collectionId\": \"Pontaj\"}]}}";
+                            json = JObject.Parse(values);
+                            //Debug.WriteLine(json.ToString());
+                            content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                            response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                            Debug.WriteLine(response);
+                            jresponse = JArray.Parse(response).Children()["document"];
+                            if (jresponse.Count() != 0)
+                            {
+                                values = "{ \"fields\": { \"Iesire\": {\"stringValue\": \"" + DateTime.Now.ToString("yyyyMMddHHmmss") + "\"}}}";
+                                json = JObject.Parse(values);
+                                content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                                response = await http.PatchAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Pontaj" + jresponse.First()["name"].ToString().Substring(jresponse.First()["name"].ToString().LastIndexOf('/')) + "?updateMask.fieldPaths=Iesire&key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                                Debug.WriteLine(response);
+                            }
                             else
                             {
-                                await stream.WriteAsync(new byte[] { 0 });
-
-                                string id = jresponse.First()["name"].ToString().Substring(jresponse.First()["name"].ToString().LastIndexOf('/')+1);
-                                
-                                /* Get all entries starting form 12PM from the current day having id same as employer*/
-                                values = "{ \"structuredQuery\": { \"where\": {\"compositeFilter\": { \"op\": \"AND\", \"filters\": [{ \"fieldFilter\": {\"field\": {\"fieldPath\": \"id\"}, \"op\": \"EQUAL\", \"value\": {\"referenceValue\": \"projects/smartviewacces/databases/(default)/documents/Angajat/" + id + "\"}}}, { \"fieldFilter\": {\"field\": {\"fieldPath\": \"Iesire\"}, \"op\": \"EQUAL\", \"value\": {\"stringValue\": \"-1\"}}}]}}, \"from\": [{\"collectionId\": \"Pontaj\"}]}}";
+                                values = "{ \"fields\": { \"id\": {\"referenceValue\": \"projects/smartviewacces/databases/(default)/documents/Angajat/" + id + "\"}, \"Intrare\": {\"stringValue\": \"" + DateTime.Now.ToString("yyyyMMddHHmmss") + "\"}, \"Iesire\": {\"stringValue\": \"-1\"}}}";
                                 json = JObject.Parse(values);
                                 //Debug.WriteLine(json.ToString());
                                 content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-                                response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
+                                response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Pontaj/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
                                 Debug.WriteLine(response);
-                                jresponse = JArray.Parse(response).Children()["document"];
-                                if(jresponse.Count() != 0)
-                                {
-                                    values = "{ \"fields\": { \"Iesire\": {\"stringValue\": \"" + DateTime.Now.ToString("yyyyMMddHHmmss") + "\"}}}";
-                                    json = JObject.Parse(values);
-                                    content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-                                    response = await http.PatchAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Pontaj" + jresponse.First()["name"].ToString().Substring(jresponse.First()["name"].ToString().LastIndexOf('/')) + "?updateMask.fieldPaths=Iesire&key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
-                                    Debug.WriteLine(response);
-                                }
-                                else
-                                {
-                                    values = "{ \"fields\": { \"id\": {\"referenceValue\": \"projects/smartviewacces/databases/(default)/documents/Angajat/" + id + "\"}, \"Intrare\": {\"stringValue\": \"" + DateTime.Now.ToString("yyyyMMddHHmmss") + "\"}, \"Iesire\": {\"stringValue\": \"-1\"}}}";
-                                    json = JObject.Parse(values);
-                                    //Debug.WriteLine(json.ToString());
-                                    content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-                                    response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Pontaj/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
-                                    Debug.WriteLine(response);
-                                }
+                            }
 
                             /*values = "{ \"structuredQuery\": { \"where\": {\"compositeFilter\": { \"op\": \"AND\", \"filters\": [{ \"fieldFilter\": {\"field\": {\"fieldPath\": \"id\"}, \"op\": \"EQUAL\", \"value\": {\"referenceValue\": \"projects/smartviewacces/databases/(default)/documents/Angajat/" + id + "\"}}}, { \"fieldFilter\": {\"field\": {\"fieldPath\": \"Iesire\"}, \"op\": \"GREATER_THAN_OR_EQUAL\", \"value\": {\"timestampValue\": \""+DateTime.Today.AddDays(-1).ToString("yyyy-MM-ddT") + "21:00:00Z" + "\"}}}]}}, \"from\": [{\"collectionId\": \"Pontaj\"}]}}";
                             json = JObject.Parse(values);
@@ -285,8 +320,8 @@ namespace dotnetnewmvc
                             }*/
 
                         }
-                                
-                        }
+
+                    }
                 }
                 else
                 {
@@ -300,7 +335,7 @@ namespace dotnetnewmvc
             {
                 i = 2;
                 await stream.ReadAsync(bytes, i, 1);
-                while(bytes[i] != '\0')
+                while (bytes[i] != '\0')
                 {
                     i++;
                     await stream.ReadAsync(bytes, i, 1);
@@ -310,7 +345,7 @@ namespace dotnetnewmvc
                 checksum = 0;
                 for (k = 0; k < i - 1; k++)
                     checksum += bytes[k];
-                if(checksum == (ushort)((bytes[i] << 8) | (bytes[i+1])))
+                if (checksum == (ushort)((bytes[i] << 8) | (bytes[i + 1])))
                 {
                     /* To do: Verify email and password received to match database  */
                     string email_password = Encoding.ASCII.GetString(bytes, 2, i - 1);

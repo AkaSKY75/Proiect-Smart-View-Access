@@ -40,26 +40,44 @@
     <h1 style="width: 100%; height: 25%; text-align: center; margin: 0;">Setarea locurilor de parcare și configurarea clădirii firmei</h1>
     <div style="position: relative; width: 100%; margin-bottom: 1%; height: 5%;  display: flex;">
         <div id="floor_select" style="position: relative; cursor: pointer; user-select: none; width: 25%; margin-bottom: 1%; height: 100%; border: 1px solid grey; background-color: #E9ECEF;">
-            <p id="current_floor" style="margin: 0; width: 100%; height: 100%;">Test</p>
+            <p id="current_floor" data-index="1" style="margin: 0; width: 100%; height: 100%;">Etajul 1</p>
             <i style="position: absolute; color: grey; right: 5%; top: 20%;" class="fas fa-caret-down"></i>
         </div>
+        <div id="button_save" style="position: relative; cursor: pointer; user-select: none; min-width: 25%; margin-left: auto; margin-bottom: 1%; height: 100%; border: 1px solid grey; background-color: #E9ECEF;">
+            <p style="margin: 0; width: 100%; height: 100%; text-align: center;">Salvați configurația</p>
+        </div>
     </div>
-    <div id="floors" class="hidden" style="top: 30%; position: absolute; width: 25%; background-color: white; border-left: 1px solid grey; border-bottom: 1px solid grey; border-right: 1px solid grey;">
-
+    <div id="floors" class="hidden" style="top: 30%; position: absolute; width: 25%; max-height: 50%; overflow-y: auto; z-index: 1; background-color: white; border-left: 1px solid grey; border-bottom: 1px solid grey; border-right: 1px solid grey;">
+        @for (int i = 1; i <= ViewBag.Etaje.Count; i++)
+        {
+            <p class="dropdown-element floor" data-index="@i" style="margin: 0; width: 100%; height: 100%;">Etajul @i</p>
+        }
+        <p id="floor_add" class="dropdown-element" style="margin: 0; width: 100%; height: 100%;">Adăugați un etaj</p>
     </div>
     <div style="width: 100%; height: 68%; position: relative; display: flex; flex-wrap: wrap;">
 
-            @for (int i = 0; i < 10; i++)
+        @for (int i = 0; i < 9; i++)
+        {
+            @for (int j = 0; j < 9; j++)
             {
-                    @for (int j = 0; j < 10; j++)
-                    {
-                        <div class="building_map" row="@i" col="@j" style="width: 10%; height: 10%;"><svg style="width: 100%; height: 100%;"><line class="line" style="display: none;" data-orientation="upper" x1="0" x2="100%" y1="0" y2="0" stroke="black" stroke-width="5px" /><line class="line" style="display: none;" data-orientation="left" x1="0" x2="0" y1="0" y2="100%" stroke="black" stroke-width="5px" /></svg></div>
-                    }
+                <div class="building_map" data-row="@i" data-col="@j" style="width: 10%; height: 10%; position: relative;"><svg style="width: 100%; height: 100%;"><line class="line" style="display: none;" data-orientation="upper" x1="0" x2="100%" y1="0" y2="0" stroke="black" stroke-width="5px" /><line class="line" style="display: none;" data-orientation="left" x1="0" x2="0" y1="0" y2="100%" stroke="black" stroke-width="5px" /></svg></div>
             }
+            <div class="building_map" data-row="@i" data-col="9" style="width: 10%; height: 10%; position: relative;"><svg style="width: 100%; height: 100%;"><line class="line" style="display: none;" data-orientation="upper" x1="0" x2="100%" y1="0" y2="0" stroke="black" stroke-width="5px" /><line class="line" style="display: none;" data-orientation="left" x1="0" x2="0" y1="0" y2="100%" stroke="black" stroke-width="5px" /><line class="line" style="display: none;" data-orientation="right" x1="100%" x2="100%" y1="0" y2="100%" stroke="black" stroke-width="5px" /></svg></div>
+        }
+        @for (int j = 0; j < 9; j++)
+        {
+            <div class="building_map" data-row="9" data-col="@j" style="width: 10%; height: 10%; position: relative;"><svg style="width: 100%; height: 100%;"><line class="line" style="display: none;" data-orientation="upper" x1="0" x2="100%" y1="0" y2="0" stroke="black" stroke-width="5px" /><line class="line" style="display: none;" data-orientation="bottom" x1="0" x2="100%" y1="100%" y2="100%" stroke="black" stroke-width="5px" /><line class="line" style="display: none;" data-orientation="left" x1="0" x2="0" y1="0" y2="100%" stroke="black" stroke-width="5px" /></svg></div>
+        }
+        <div class="building_map" data-row="9" data-col="9" style="width: 10%; height: 10%; position: relative;"><svg style="width: 100%; height: 100%;"><line class="line" style="display: none;" data-orientation="upper" x1="0" x2="100%" y1="0" y2="0" stroke="black" stroke-width="5px" /><line class="line" style="display: none;" data-orientation="bottom" x1="0" x2="100%" y1="100%" y2="100%" stroke="black" stroke-width="5px" /><line class="line" style="display: none;" data-orientation="left" x1="0" x2="0" y1="0" y2="100%" stroke="black" stroke-width="5px" /><line class="line" style="display: none;" data-orientation="right" x1="100%" x2="100%" y1="0" y2="100%" stroke="black" stroke-width="5px" /></svg></div>
+
     </div>
 </div>
 
 <script>
+    var lastX;
+    var lastY;
+    var pin1_hold = false;
+    var pin2_hold = false;
     $('#toolbox_wall, #toolbox_desk, #toolbox_chair').mouseenter(function () {
         item = $(this);
         if (!$(this).is(':animated')) {
@@ -75,7 +93,6 @@
         });
     });
     $('#toolbox_wall, #toolbox_desk, #toolbox_chair').mousedown(function (e) {
-        //<i style="width: 100%; margin-top: 25%; text-align: center;" class="fas fa-chair fa-3x" aria-hidden="true"></i>
         var icon = document.createElement('i');
         icon.className = $(this).find('i').attr('class');
         icon.style.position = "absolute";
@@ -85,47 +102,587 @@
         icon.style.top = e.pageY - icon.offsetHeight / 2 + "px";
         icon.style.left = e.pageX - icon.offsetWidth / 2 + "px";
         $(icon).data('item', $(this).index());
-        $('line').css('stroke', 'green').css('display', '');
+        $('line:not(.added)').css('stroke', 'green').css('display', '');
+    });
+    $('html').on("mousedown", function (e) {
+        if (!$('#floors').hasClass('hidden') && !$(e.target).hasClass("dropdown-element") && e.target.id != "current_floor")
+            $('#floors').addClass('hidden');
+        if ($('.created_pin').length == 2 && $(e.target).hasClass('created_pin') == false) {
+            document.querySelectorAll('.created_pin')[0].remove();
+            document.querySelectorAll('.created_pin')[0].remove();
+        }
     });
     $('html').mousemove(function (e) {
-        if ($('#created_icon').length != 0)
-            $('#created_icon').css("top", e.pageY - $('#created_icon').outerHeight() / 2 + "px").css("left", e.pageX - $('#created_icon').outerWidth() / 2 + "px");
+        if ($('#created_icon').length != 0) {
+            if (e.pageX - $('#created_icon').outerWidth() / 2 > 0 && e.pageY - $('#created_icon').outerHeight() / 2 > 0 && e.pageX + $('#created_icon').outerWidth() / 2 < $(window).width() && e.pageY + $('#created_icon').outerHeight() / 2 < $(window).height())
+                $('#created_icon').css("top", e.pageY - $('#created_icon').outerHeight() / 2 + "px").css("left", e.pageX - $('#created_icon').outerWidth() / 2 + "px");
+            else if (e.pageX - $('#created_icon').outerWidth() / 2 < 0 && e.pageY - $('#created_icon').outerHeight() / 2 > 0 && e.pageY + $('#created_icon').outerHeight() / 2 <= $(window).height())
+                $('#created_icon').css("top", e.pageY - $('#created_icon').outerHeight() / 2 + "px").css("left", "0px");
+            else if (e.pageX - $('#created_icon').outerWidth() / 2 < 0 && e.pageY - $('#created_icon').outerHeight() / 2 > 0 && e.pageY + $('#created_icon').outerHeight() / 2 > $(window).height())
+                $('#created_icon').css("top", $(window).height() - $('#created_icon').outerHeight() + "px").css("left", "0px");
+            else if (e.pageX - $('#created_icon').outerWidth() / 2 < 0 && e.pageY - $('#created_icon').outerHeight() / 2 < 0)
+                $('#created_icon').css("top", "0px").css("left", "0px");
+            else if (e.pageX - $('#created_icon').outerWidth() / 2 > 0 && e.pageY - $('#created_icon').outerHeight() / 2 < 0 && e.pageX + $('#created_icon').outerWidth() / 2 <= $(window).width())
+                $('#created_icon').css("top", "0px").css("left", e.pageX - $('#created_icon').outerWidth() / 2 + "px");
+            else if (e.pageX - $('#created_icon').outerWidth() / 2 > 0 && e.pageY - $('#created_icon').outerHeight() / 2 < 0 && e.pageX + $('#created_icon').outerWidth() / 2 > $(window).width())
+                $('#created_icon').css("top", "0px").css("left", $(window) - $('#created_icon').outerWidth() + "px");
+            else if (e.pageX + $('#created_icon').outerWidth() / 2 > $(window).width() && e.pageY + $('#created_icon').outerHeight() / 2 < $(window).height())
+                $('#created_icon').css("top", e.pageY - $('#created_icon').outerHeight() / 2 + "px").css("left", $(window).width() - $('#created_icon').outerWidth() + "px");
+            else if (e.pageX + $('#created_icon').outerWidth() / 2 < $(window).width() && e.pageY + $('#created_icon').outerHeight() / 2 > $(window).height())
+                $('#created_icon').css("top", $(window).height() - $('#created_icon').outerHeight() + "px").css("left", e.pageX - $('#created_icon').outerWidth() / 2 + "px");
+            else if (e.pageX + $('#created_icon').outerWidth() / 2 > $(window).width() && e.pageY + $('#created_icon').outerHeight() / 2 > $(window).height())
+                $('#created_icon').css("top", $(window).height() - $('#created_icon').outerHeight() + "px").css("left", $(window).width() - $('#created_icon').outerWidth() + "px");
 
+        }
+        else if (pin1_hold == true) {
+            var pin = document.querySelector('.created_pin[data-index="1"]');
+            var i = pin.parentNode.dataset.row;
+            var j = pin.parentNode.dataset.col;
+
+            if ((pin.dataset.orientation == "upper" || pin.dataset.orientation == "bottom") && e.pageX - lastX < -3) {
+                if (j > 0) {
+                    j = +j - 1;
+                    //console.log($('.building_map[data-row="' + i + '"][data-col="' + j + '"]').find('svg').eq(0).find('line[data-orientation="upper"]').eq(0);
+                    //var target = $('.building_map[data-row="' + i + '"][data-col="' + j + '"]').find('svg').eq(0).find('line[data-orientation="upper"]').eq(0);
+                    var target = document.querySelector('.building_map[data-row="' + i + '"][data-col="' + j + '"]');
+                    var line = target.querySelector('svg > line[data-orientation="' + pin.dataset.orientation + '"]');
+                    line.style.stroke = "black";
+                    line.style.strokeWidth = "10px";
+                    line.style.display = "";
+                    $(line).addClass('added');
+                    pin.remove();
+                    pin = document.createElement('pin');
+                    pin.className = "fas fa-map-pin created_pin"
+                    pin.style.cursor = "pointer";
+                    pin.style.color = "green";
+                    pin.style.position = "absolute";
+                    pin.style.left = "0";
+                    pin.dataset.index = "1";
+                    pin.dataset.orientation = line.dataset.orientation;
+                    target.appendChild(pin);
+                    if (line.dataset.orientation == "upper")
+                        pin.style.top = "-" + pin.offsetHeight + "px";
+                    else if (line.dataset.orientation == "bottom")
+                        pin.style.bottom = "5px";
+                    $(pin).mousedown(function (e) {
+                        pin1_hold = true;
+                        $('line:not(.added)').css('stroke', 'green').css('display', '');
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                    });
+                    
+                }
+            }
+            else if ((pin.dataset.orientation == "upper" || pin.dataset.orientation == "bottom") && e.pageX - lastX > 3) {
+                var current = document.querySelector('.building_map[data-row="' + i + '"][data-col="' + j + '"]');
+                if (current.querySelectorAll('.created_pin').length != 2) {
+                    j = +j + 1;
+                    var target = document.querySelector('.building_map[data-row="' + i + '"][data-col="' + j + '"]');
+                    var line = current.querySelector('svg > line[data-orientation="' + pin.dataset.orientation+'"]');
+                    line.style.stroke = "green";
+                    line.style.strokeWidth = "5px";
+                    $(line).removeClass('added');
+                    pin.remove();
+                    pin = document.createElement('pin');
+                    pin.className = "fas fa-map-pin created_pin"
+                    pin.style.cursor = "pointer";
+                    pin.style.color = "green";
+                    pin.style.position = "absolute";
+                    pin.style.left = "0";
+                    pin.dataset.index = "1";
+                    pin.dataset.orientation = line.dataset.orientation;
+                    target.appendChild(pin);
+                    if (line.dataset.orientation == "upper")
+                        pin.style.top = "-" + pin.offsetHeight + "px";
+                    else if (line.dataset.orientation == "bottom")
+                        pin.style.bottom = "5px";
+
+                    $(pin).mousedown(function (e) {
+                        pin1_hold = true;
+                        $('line:not(.added)').css('stroke', 'green').css('display', '');
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                    });
+                }
+
+            }
+            else if ((pin.dataset.orientation == "left" || pin.dataset.orientation == "right") && e.pageY - lastY < -3) {
+                if (i > 0) {
+                    i = +i - 1;
+                    var target = document.querySelector('.building_map[data-row="' + i + '"][data-col="' + j + '"]');
+                    var line = target.querySelector('svg > line[data-orientation="' + pin.dataset.orientation + '"]');
+                    line.style.stroke = "black";
+                    line.style.strokeWidth = "10px";
+                    $(line).addClass('added');
+                    pin.remove();
+                    pin = document.createElement('pin');
+                    pin.className = "fas fa-map-pin created_pin"
+                    pin.style.cursor = "pointer";
+                    pin.style.color = "green";
+                    pin.style.position = "absolute";
+                    if (line.dataset.orientation == "left")
+                        pin.style.transform = "rotate(-90deg)";
+                    else if (line.dataset.orientation == "right")
+                        pin.style.transform = "rotate(90deg)";
+                    pin.style.top = "0";
+                    pin.dataset.index = "1";
+                    pin.dataset.orientation = line.dataset.orientation;
+                    target.appendChild(pin);
+                    if (line.dataset.orientation == "left")
+                        pin.style.left = "-" + pin.offsetHeight + "px";
+                    else if (line.dataset.orientation == "right")
+                        pin.style.right = "-" + pin.offsetHeight + "px";
+                    $(pin).mousedown(function (e) {
+                        pin1_hold = true;
+                        $('line:not(.added)').css('stroke', 'green').css('display', '');
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                    });
+                }
+
+            }
+            else if ((pin.dataset.orientation == "left" || pin.dataset.orientation == "right") && e.pageY - lastY > 3) {
+                //console.log($('.building_map[data-row="' + i + '"][data-col="' + j + '"]').find('svg').eq(0).find('line[data-orientation="upper"]').eq(0);
+                //var target = $('.building_map[data-row="' + i + '"][data-col="' + j + '"]').find('svg').eq(0).find('line[data-orientation="upper"]').eq(0);
+                var current = document.querySelector('.building_map[data-row="' + i + '"][data-col="' + j + '"]');
+                if (current.querySelectorAll('.created_pin').length != 2) {
+                    i = +i + 1;
+                    var target = document.querySelector('.building_map[data-row="' + i + '"][data-col="' + j + '"]');
+                    var line = current.querySelector('svg > line[data-orientation="' + pin.dataset.orientation + '"]');
+                    line.style.stroke = "green";
+                    line.style.strokeWidth = "5px";
+                    $(line).removeClass('added');
+                    pin.remove();
+                    pin = document.createElement('pin');
+                    pin.className = "fas fa-map-pin created_pin"
+                    pin.style.cursor = "pointer";
+                    pin.style.color = "green";
+                    pin.style.position = "absolute";
+                    if (line.dataset.orientation == "left")
+                        pin.style.transform = "rotate(-90deg)";
+                    else if (line.dataset.orientation == "right")
+                        pin.style.transform = "rotate(90deg)";
+                    pin.style.top = "0";
+                    pin.dataset.index = "1";
+                    pin.dataset.orientation = line.dataset.orientation;
+                    target.appendChild(pin);
+                    if (line.dataset.orientation == "left")
+                        pin.style.left = "-" + pin.offsetHeight + "px";
+                    else if (line.dataset.orientation == "right")
+                        pin.style.right = "-" + pin.offsetHeight + "px";
+                    $(pin).mousedown(function (e) {
+                        pin1_hold = true;
+                        $('line:not(.added)').css('stroke', 'green').css('display', '');
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                    });
+                }
+
+            }
+            lastX = e.pageX;
+            lastY = e.pageY;
+
+        }
+        else if (pin2_hold == true) {
+            var pin = document.querySelector('.created_pin[data-index="2"]');
+            var i = pin.parentNode.dataset.row;
+            var j = pin.parentNode.dataset.col;
+
+            if((pin.dataset.orientation == "upper" || pin.dataset.orientation == "bottom") && e.pageX - lastX > 3) {
+                if (j < 9) {
+                    j = +j + 1;
+                    var target = document.querySelector('.building_map[data-row="' + i + '"][data-col="' + j + '"]');
+                    var line = target.querySelector('svg > line[data-orientation="' + pin.dataset.orientation+'"]');
+                    line.style.stroke = "black";
+                    line.style.strokeWidth = "10px";
+                    line.style.display = "";
+                    $(line).addClass('added');
+                    pin.remove();
+                    pin = document.createElement('pin');
+                    pin.className = "fas fa-map-pin created_pin"
+                    pin.style.cursor = "pointer";
+                    pin.style.color = "green";
+                    pin.style.position = "absolute";
+                    pin.style.right = "0";
+                    pin.dataset.index = "2";
+                    pin.dataset.orientation = line.dataset.orientation;
+                    target.appendChild(pin);
+                    if (line.dataset.orientation == "upper")
+                        pin.style.top = "-" + pin.offsetHeight + "px";
+                    else if (line.dataset.orientation == "bottom")
+                        pin.style.bottom = "5px";
+                    $(pin).mousedown(function (e) {
+                        pin2_hold = true;
+                        $('line:not(.added)').css('stroke', 'green').css('display', '');
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                    });
+
+                }
+            }
+            else if ((pin.dataset.orientation == "upper" || pin.dataset.orientation == "bottom") && e.pageX - lastX < -3) {
+                var current = document.querySelector('.building_map[data-row="' + i + '"][data-col="' + j + '"]');
+                if (current.querySelectorAll('.created_pin').length != 2) {
+                    j = +j - 1;
+                    var target = document.querySelector('.building_map[data-row="' + i + '"][data-col="' + j + '"]');
+                    var line = current.querySelector('svg > line[data-orientation="' + pin.dataset.orientation+'"]');
+                    line.style.stroke = "green";
+                    line.style.strokeWidth = "5px";
+                    $(line).removeClass('added');
+                    pin.remove();
+                    pin = document.createElement('pin');
+                    pin.className = "fas fa-map-pin created_pin"
+                    pin.style.cursor = "pointer";
+                    pin.style.color = "green";
+                    pin.style.position = "absolute";
+                    pin.style.right = "0";
+                    pin.dataset.index = "2";
+                    pin.dataset.orientation = line.dataset.orientation;
+                    target.appendChild(pin);
+                    if (line.dataset.orientation == "upper")
+                        pin.style.top = "-" + pin.offsetHeight + "px";
+                    else if (line.dataset.orientation == "bottom")
+                        pin.style.bottom = "5px";
+                    $(pin).mousedown(function (e) {
+                        pin2_hold = true;
+                        $('line:not(.added)').css('stroke', 'green').css('display', '');
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                    });
+                }
+
+            }
+            else if ((pin.dataset.orientation == "left" || pin.dataset.orientation == "right") && e.pageY - lastY > 3) {
+                if (i < 9) {
+                    i = +i + 1;
+                    var target = document.querySelector('.building_map[data-row="' + i + '"][data-col="' + j + '"]');
+                    var line = target.querySelector('svg > line[data-orientation="' + pin.dataset.orientation+'"]');
+                    line.style.stroke = "black";
+                    line.style.strokeWidth = "10px";
+                    $(line).addClass('added');
+                    pin.remove();
+                    pin = document.createElement('pin');
+                    pin.className = "fas fa-map-pin created_pin"
+                    pin.style.cursor = "pointer";
+                    pin.style.color = "green";
+                    pin.style.position = "absolute";
+                    if (line.dataset.orientation == "left")
+                        pin.style.transform = "rotate(-90deg)";
+                    else if (line.dataset.orientation == "right")
+                        pin.style.transform = "rotate(90deg)";
+                    pin.style.bottom = "5px";
+                    pin.dataset.index = "2";
+                    pin.dataset.orientation = line.dataset.orientation;
+                    target.appendChild(pin);
+                    if (line.dataset.orientation == "left")
+                        pin.style.left = "-" + pin.offsetHeight + "px";
+                    else if (line.dataset.orientation == "right")
+                        pin.style.right = "-" + pin.offsetHeight + "px";
+                    $(pin).mousedown(function (e) {
+                        pin2_hold = true;
+                        $('line:not(.added)').css('stroke', 'green').css('display', '');
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                    });
+                }
+
+            }
+            else if ((pin.dataset.orientation == "left" || pin.dataset.orientation == "right") && e.pageY - lastY < -3) {
+                var current = document.querySelector('.building_map[data-row="' + i + '"][data-col="' + j + '"]');
+                if (current.querySelectorAll('.created_pin').length != 2) {
+                    i = +i - 1;
+                    var target = document.querySelector('.building_map[data-row="' + i + '"][data-col="' + j + '"]');
+                    var line = current.querySelector('svg > line[data-orientation="' + pin.dataset.orientation + '"]');
+                    line.style.stroke = "green";
+                    line.style.strokeWidth = "5px";
+                    $(line).removeClass('added');
+                    pin.remove();
+                    pin = document.createElement('pin');
+                    pin.className = "fas fa-map-pin created_pin"
+                    pin.style.cursor = "pointer";
+                    pin.style.color = "green";
+                    pin.style.position = "absolute";
+                    if (line.dataset.orientation == "left")
+                        pin.style.transform = "rotate(-90deg)";
+                    else if (line.dataset.orientation == "right")
+                        pin.style.transform = "rotate(90deg)";
+                    pin.style.bottom = "5px";
+                    pin.dataset.index = "2";
+                    pin.dataset.orientation = line.dataset.orientation;
+                    target.appendChild(pin);
+                    if (line.dataset.orientation == "left")
+                        pin.style.left = "-" + pin.offsetHeight + "px";
+                    else if (line.dataset.orientation == "right")
+                        pin.style.right = "-" + pin.offsetHeight + "px";
+                    $(pin).mousedown(function (e) {
+                        pin2_hold = true;
+                        $('line:not(.added)').css('stroke', 'green').css('display', '');
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                    });
+                }
+
+            }
+            lastX = e.pageX;
+            lastY = e.pageY;
+        }
     })
     $('html').mouseup(function (e) {
         if ($('#created_icon').length != 0) {
-            console.log(e.target.className)
-            if (e.target.className == "line")
-                $('line').addClass('added');
+
+            //console.log(e.target.className)
+            if ($(e.target).hasClass("line") && $('#created_icon').data('item') == 0) {
+                $(e.target).addClass('added');
+                var pin = document.createElement('i');
+                pin.className = "fas fa-map-pin created_pin";
+                pin.style.position = "absolute";
+                pin.style.cursor = "pointer";
+                pin.style.color = "green";
+                pin.dataset.index = "1";
+                if ($(e.target).data('orientation') == "upper") {
+                    pin.style.left = "0";
+                    pin.dataset.orientation = "upper";
+                    e.target.parentNode.parentNode.appendChild(pin);
+                    $(pin).mousedown(function (e) {
+                        pin1_hold = true;
+                        $('line:not(.added)').css('stroke', 'green').css('display', '');
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                    });
+                    pin.style.top = "-" + pin.offsetHeight + "px";
+
+                    pin = document.createElement('i');
+                    pin.style.cursor = "pointer";
+                    pin.style.color = "green";
+                    pin.className = "fas fa-map-pin created_pin";
+                    pin.style.position = "absolute";
+                    pin.style.right = "0";
+                    pin.dataset.index = "2";
+                    pin.dataset.orientation = "upper";
+                    e.target.parentNode.parentNode.appendChild(pin);
+                    $(pin).mousedown(function () {
+                        pin2_hold = true;
+                        $('line:not(.added)').css('stroke', 'green').css('display', '');
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                    });
+                    pin.style.top = "-" + pin.offsetHeight + "px";
+                }
+                else if ($(e.target).data('orientation') == "bottom") {
+                    pin.style.left = "0";
+                    pin.dataset.orientation = "bottom";
+                    e.target.parentNode.parentNode.appendChild(pin);
+                    $(pin).mousedown(function (e) {
+                        pin1_hold = true;
+                        $('line:not(.added)').css('stroke', 'green').css('display', '');
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                    });
+                    pin.style.bottom = "5px";
+
+                    pin = document.createElement('i');
+                    pin.style.cursor = "pointer";
+                    pin.style.color = "green";
+                    pin.className = "fas fa-map-pin created_pin";
+                    pin.style.position = "absolute";
+                    pin.style.right = "0";
+                    pin.dataset.index = "2";
+                    pin.dataset.orientation = "bottom";
+                    e.target.parentNode.parentNode.appendChild(pin);
+                    $(pin).mousedown(function () {
+                        pin2_hold = true;
+                        $('line:not(.added)').css('stroke', 'green').css('display', '');
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                    });
+                    pin.style.bottom = "5px";
+                }
+                else if ($(e.target).data('orientation') == "left") {
+                    pin.style.top = "0";
+                    pin.style.transform = "rotate(-90deg)";
+                    pin.dataset.index = "1";
+                    pin.dataset.orientation = "left";
+                    e.target.parentNode.parentNode.appendChild(pin);
+                    $(pin).mousedown(function () {
+                        pin1_hold = true;
+                        $('line:not(.added)').css('stroke', 'green').css('display', '');
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                    });
+                    pin.style.left = "-" + pin.offsetHeight + "px";
+                    pin = document.createElement('i');
+
+                    pin.style.cursor = "pointer";
+                    pin.style.color = "green";
+                    pin.className = "fas fa-map-pin created_pin";
+                    pin.style.position = "absolute";
+                    pin.style.bottom = "5px";
+                    pin.style.transform = "rotate(-90deg)";
+                    pin.dataset.index = "2";
+                    pin.dataset.orientation = "left";
+                    e.target.parentNode.parentNode.appendChild(pin);
+                    $(pin).mousedown(function () {
+                        pin2_hold = true;
+                        $('line:not(.added)').css('stroke', 'green').css('display', '');
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                    });
+                    pin.style.left = "-" + pin.offsetHeight + "px";
+                }
+                else if ($(e.target).data('orientation') == "right") {
+                    pin.style.top = "0";
+                    pin.style.transform = "rotate(90deg)";
+                    pin.dataset.index = "1";
+                    pin.dataset.orientation = "right";
+                    e.target.parentNode.parentNode.appendChild(pin);
+                    $(pin).mousedown(function () {
+                        pin1_hold = true;
+                        $('line:not(.added)').css('stroke', 'green').css('display', '');
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                    });
+                    pin.style.right = "-" + pin.offsetHeight + "px";
+                    pin = document.createElement('i');
+
+                    pin.style.cursor = "pointer";
+                    pin.style.color = "green";
+                    pin.className = "fas fa-map-pin created_pin";
+                    pin.style.position = "absolute";
+                    pin.style.bottom = "5px";
+                    pin.style.transform = "rotate(90deg)";
+                    pin.dataset.index = "2";
+                    pin.dataset.orientation = "right";
+                    e.target.parentNode.parentNode.appendChild(pin);
+                    $(pin).mousedown(function () {
+                        pin2_hold = true;
+                        $('line:not(.added)').css('stroke', 'green').css('display', '');
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                    });
+                    pin.style.right = "-" + pin.offsetHeight + "px";
+                }
+            }
             $('line:not(.added)').css('stroke-width', '5px').css('stroke', 'black').css('display', 'none');
             document.getElementById("created_icon").remove();
+        }
+        else if (pin1_hold == true || pin2_hold == true) {
+            $('line:not(.added)').css('stroke', 'black').css('display', 'none');
+            pin1_hold = false;
+            pin2_hold = false;
         }
     });
     $('line').mouseenter(function () {
 
-        if ($('#created_icon').length != 0) {
+        if ($('#created_icon').length != 0 && $('#created_icon').data('item') == 0 && $(this).hasClass('added') == false) {
             $(this).css('stroke', "black");
             $(this).css('stroke-width', "10px");
             $('#created_icon').css('display', 'none');
         }
     });
     $('line').mouseleave(function () {
-        if ($('#created_icon').length != 0) {
+        if ($('#created_icon').length != 0 && $('#created_icon').data('item') == 0 && $(this).hasClass('added') == false) {
             $(this).css('stroke', "green");
             $(this).css('stroke-width', "5px");
             $('#created_icon').css('display', '');
         }
     });
-    $('#month_select').on('click', function () {
-        $('#months').toggleClass('hidden');
+
+    $('#button_save').on("click", function () {
+        walls = ""
+        for (var i = 0; i < 10; i++)
+            for (var j = 0; j < 10; j++) {
+                walls += "[";
+                var cell = $('.building_map[data-row="' + i + '"][data-col="' + j + '"]');
+                var line = cell.find('svg').eq(0);
+                if (line.find('line[data-orientation="upper"]').eq(0).hasClass('added'))
+                    walls += "1 ";
+                else
+                    walls += "0 ";
+                if (line.find('line[data-orientation="left"]').eq(0).hasClass('added'))
+                    walls += "1 ";
+                else
+                    walls += "0 ";
+                if (line.find('line[data-orientation="bottom"]').eq(0).hasClass('added'))
+                    walls += "1 ";
+                else
+                    walls += "0 ";
+                if (line.find('line[data-orientation="right"]').eq(0).hasClass('added'))
+                    walls += "1] ";
+                else
+                    walls += "0] ";
+
+            }
+        walls = walls.substring(0, walls.lastIndexOf(' '));
+        $.ajax({
+            url: "/",
+            method: "POST",
+            data: {"floor_update": $('#current_floor').data('index'), "walls": walls}
+        });
+    });
+
+    $('#floor_select').on('click', function () {
+        $('#floors').toggleClass('hidden');
+    });
+
+    function dropdown_mouseenter(dropdown) {
+        dropdown.css('background-color', '#4C8BF5');
+
+    }
+    function dropdown_mouseleave(dropdown) {
+        dropdown.css('background-color', '');
+
+    }
+
+    function dropdown_click(dropdown) {
+        if (dropdown.hasClass("floor")) {
+            $('#current_floor').text(dropdown.text());
+            $('#current_floor').data('index', dropdown.data('index'));
+        }
+        else if (dropdown.attr('id') == "floor_add") {
+            document.getElementById('floor_add').remove();
+            var p = document.createElement('p');
+            p.className = "dropdown-element floor";
+            p.style.margin = "0";
+            p.textContent = "Etajul " + (+$('.floor').length + 1);
+            document.getElementById('floors').appendChild(p);
+            $(p).data('index', $('.floor').length);
+            $(p).on("click", function () {
+                dropdown_click($(this));
+            });
+            $(p).mouseenter(function () {
+                dropdown_mouseenter($(this));
+            });
+            $(p).mouseleave(function () {
+                dropdown_mouseleave($(this));
+            });
+
+            p = document.createElement('p');
+            p.className = "dropdown-element";
+            p.id = "floor_add"
+            p.style.margin = "0";
+            p.textContent = "Adăugați un etaj";
+            document.getElementById('floors').appendChild(p);
+            $(p).on("click", function () {
+                dropdown_click($(this));
+            });
+            $(p).mouseenter(function () {
+                dropdown_mouseenter($(this));
+            });
+            $(p).mouseleave(function () {
+                dropdown_mouseleave($(this));
+            });
+
+        }
+    }
+
+    $('.dropdown-element').on("click", function () {
+        dropdown_click($(this));
     });
     $(".dropdown-element").mouseenter(function () {
-        if (!$(this).hasClass('error'))
-            $(this).css('background-color', '#4C8BF5');
+        dropdown_mouseenter($(this));
     });
     $(".dropdown-element").mouseleave(function () {
-        if (!$(this).hasClass('error'))
-            $(this).css('background-color', '');
+        dropdown_mouseleave($(this));
     });
     $("#profile_pic_select").change(function () {
         var input = this;
