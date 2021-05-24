@@ -46,7 +46,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                     ),
                     Container(
                       color: Colors.grey[300],
-                      child: model.avatar == null
+                      child: model.avatar == ''
                           ? IconButton(
                               onPressed: () async {
                                 showAlertDialogOwn(() async {
@@ -71,7 +71,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                                   await model.uploadAvatar();
                                 }, context);
                               },
-                              child: model.avatar == null
+                              child: model.imagePicked != null
                                   ? Image.file(
                                       model.imagePicked,
                                       width: 100,
@@ -88,14 +88,16 @@ class ProfileScreenState extends State<ProfileScreen> {
                     SizedBox(
                       width: 20,
                     ),
-                    Container(
-                      padding: EdgeInsets.only(left: 150),
-                      child: Image(
-                        width: 100,
-                        height: 100,
-                        alignment: Alignment.bottomRight,
-                        image: NetworkImage(
-                            'https://cdn.discordapp.com/attachments/814426440308752449/814460660569735199/1.png'),
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.only(left: 150),
+                        child: Image(
+                          width: 100,
+                          height: 100,
+                          alignment: Alignment.bottomRight,
+                          image: NetworkImage(
+                              'https://cdn.discordapp.com/attachments/814426440308752449/814460660569735199/1.png'),
+                        ),
                       ),
                     )
                   ],
