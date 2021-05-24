@@ -32,7 +32,7 @@ class LoginServices {
                 data1.data()['parola'] == hash.toString()) {
               await _populateCurrentUser(data1.id);
               flag = true;
-            }
+            } 
           } catch (error) {
             print("$error");
           }

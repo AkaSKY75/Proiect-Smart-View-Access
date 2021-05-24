@@ -137,9 +137,8 @@ class ChangePasswordScreen extends StatelessWidget {
                         style: TextStyle(color: Colors.black),
                       ),
                       onPressed: () {
-                        model.changePassword(
-                            currentPass.text, newPass.text, confirmPass.text);
-                        Navigator.of(context).pop();
+                        model.changePassword(currentPass.text, newPass.text,
+                            confirmPass.text, context);
                       })),
               Spacer(),
             ],

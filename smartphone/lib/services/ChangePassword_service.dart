@@ -5,8 +5,9 @@ import 'dart:convert';
 
 class ChangePasswordService {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  Future<void> changePass(String currentPass, String newPass,
+  Future<bool> changePass(String currentPass, String newPass,
       String confirmPass, String uid) async {
+    bool flag = false;
     String hashCurrent = hashPass(currentPass);
     String hashNewPass = hashPass(newPass);
     DocumentReference angajatReferance =
@@ -18,11 +19,12 @@ class ChangePasswordService {
         angajatReferance.update({
           'parola': hashNewPass,
         });
+        flag = true;
       }
     } catch (error) {
       print("$error");
     }
-  
+    return flag;
   }
 
   String hashPass(String password) {
