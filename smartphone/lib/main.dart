@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:smartphone/screens/ChangePassword_screen.dart';
 import 'package:smartphone/screens/Login_screen.dart';
 import 'package:smartphone/screens/Profile_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:smartphone/services/ChangePassword_service.dart';
 import 'locator.dart';
 
 
@@ -23,10 +25,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
-        // When navigating to the "/" route, build the FirstScreen widget.
         '/': (context) => Login(),
-        // When navigating to the "/second" route, build the SecondScreen widget.
         '/profile': (context) => ProfileScreen(),
+        '/changePassword': (context) => ChangePasswordScreen(),
       },
     );
   }

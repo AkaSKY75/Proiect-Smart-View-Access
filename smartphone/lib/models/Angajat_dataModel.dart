@@ -1,7 +1,7 @@
 class AngajatDataModel {
   String avatar;
   int birou;
-  int cnp;
+  String cnp;
   String departament;
   String email;
   String email_firma;
@@ -67,7 +67,7 @@ class AngajatDataModel {
 
   String get _avatar => avatar;
   int get _birou => birou;
-  int get _cnp => cnp;
+  String get _cnp => cnp;
   String get _departament => departament;
   String get _email => email;
   String get _email_firma => email_firma;

@@ -1,4 +1,5 @@
 import 'package:smartphone/models/Angajat_dataModel.dart';
+import 'package:smartphone/services/ChangePassword_service.dart';
 import 'package:smartphone/services/Database_service.dart';
 import 'package:smartphone/services/login_service.dart';
 import 'package:smartphone/services/media_service.dart';
@@ -14,6 +15,7 @@ class BaseModel extends BaseViewModel {
   final ProfileServices profileServices = locator<ProfileServices>();
   final DatabaseService databaseService = locator<DatabaseService>();
   final MediaService mediaService = locator<MediaService>();
+  final ChangePasswordService changePasswordService = locator<ChangePasswordService>();
 
   AngajatDataModel getCurrentUser() {
     return loginServices.currentUser;
@@ -23,7 +25,7 @@ class BaseModel extends BaseViewModel {
   String get nume => getCurrentUser().nume;
   String get avatar => getCurrentUser().avatar;
   String get prenume => getCurrentUser().prenume;
-  int get cnp => getCurrentUser().cnp;
+  String get cnp => getCurrentUser().cnp;
   String get departament => getCurrentUser().departament;
   int get etaj => getCurrentUser().etaj;
   int get birou => getCurrentUser().birou;

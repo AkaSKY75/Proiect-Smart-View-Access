@@ -161,7 +161,9 @@ class ProfileScreenState extends State<ProfileScreen> {
                                 color: Colors.grey[300],
                                 borderRadius: BorderRadius.zero),
                             child: MaterialButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.pushNamed(context, "/changePassword");
+                              },
                               child: Text("Schimbare parola"),
                             ),
                           ),

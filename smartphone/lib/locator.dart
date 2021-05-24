@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:smartphone/services/ChangePassword_service.dart';
 import 'package:smartphone/services/Database_service.dart';
 import 'package:smartphone/services/login_service.dart';
 import 'package:smartphone/services/media_service.dart';
@@ -13,4 +14,5 @@ void setupLocator() {
   locator.registerLazySingleton(() => ProfileServices());
   locator.registerLazySingleton(() => DatabaseService());
   locator.registerLazySingleton(() => MediaService());
+  locator.registerLazySingleton(() => ChangePasswordService());
 }
