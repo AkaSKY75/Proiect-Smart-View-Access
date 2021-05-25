@@ -31,7 +31,6 @@ namespace dotnetnewmvc
             {
                 TcpClient client = await server.AcceptTcpClientAsync();
                 RunWorker(client);
-                //Debug.WriteLine(((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString());
             }
         }
 
@@ -78,7 +77,6 @@ namespace dotnetnewmvc
                         json = JObject.Parse(query);
                         content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
                         response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents:runQuery/?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
-                        //Debug.WriteLine(response);
                         jresponse = JArray.Parse(response).Children()["document"];
                         if (jresponse.First()["fields"]["locuri_parcare_ocupate"]["integerValue"].ToString() == jresponse.First()["fields"]["locuri_parcare_max"]["integerValue"].ToString())
                         {
@@ -93,7 +91,6 @@ namespace dotnetnewmvc
                             json = JObject.Parse(query);
                             content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
                             response = await http.PatchAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Cladire/Cladire_SmartView?updateMask.fieldPaths=locuri_parcare_ocupate&key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
-                            Debug.WriteLine(response);
                             string path;
                             query = "{\"structuredQuery\": { \"select\": {\"fields\": [{\"fieldPath\": \"name\"}]}, \"from\": [{ \"collectionId\": \"Parcare\" }], \"where\": { \"fieldFilter\": {\"field\": {\"fieldPath\": \"data\"}, \"op\": \"EQUAL\", \"value\": {\"stringValue\": \"" + DateTime.Today.ToString("yyyyMMdd") + "000000" + "\"}}}}}";
                             json = JObject.Parse(query);
@@ -116,12 +113,10 @@ namespace dotnetnewmvc
                             content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
                             response = await http.PostAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Parcare/" + path + "/Masini?key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
                         }
-                        //Debug.WriteLine(response);
                         /* To do: Check database for received number (bytes[0->i-2]) => Send 0 for access and 1 otherwise */
 
 
                     }
-                    //await stream.WriteAsync(new byte[] { 1 });
 
                 }
                 else
@@ -146,7 +141,7 @@ namespace dotnetnewmvc
                     json = JObject.Parse(query);
                     content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
                     response = await http.PatchAsync("https://firestore.googleapis.com/v1/projects/smartviewacces/databases/(default)/documents/Cladire/Cladire_SmartView?updateMask.fieldPaths=locuri_parcare_ocupate&key=AIzaSyAfTvf08m4ZPebBTzN3wW_xyEQ61OqF8EA", content).Result.Content.ReadAsStringAsync();
-                    bytes = Encoding.ASCII.GetBytes(locuri.ToString()+'\0'+jresponse.First()["fields"]["locuri_parcare_max"]["integerValue"].ToString()+'\0'+"##");
+                    bytes = Encoding.ASCII.GetBytes((locuri-1).ToString()+'\0'+jresponse.First()["fields"]["locuri_parcare_max"]["integerValue"].ToString()+'\0'+"##");
                     checksum = 0;
                     for (i = 0; i < bytes.Length - 2; i++)
                         checksum += i;
@@ -246,11 +241,9 @@ namespace dotnetnewmvc
                 checksum = 0;
                 for (i = 0; i < 29; i++)
                     checksum += bytes[i];
-                //Debug.WriteLine(checksum);
                 if (checksum == (ushort)(bytes[29] << 8 | bytes[30]))
                 {
                     string cnp_datetime = Encoding.ASCII.GetString(bytes, 2, 27);
-                    //Debug.WriteLine(cnp_datetime);
                     DateTime datetime = DateTime.ParseExact(cnp_datetime.Substring(13), "yyyyMMddHHmmss", System.Globalization.CultureInfo.InvariantCulture);
                     if ((DateTime.Now - datetime).TotalMinutes >= 5)
                     {
