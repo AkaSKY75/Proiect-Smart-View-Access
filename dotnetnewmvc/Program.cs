@@ -20,7 +20,7 @@ namespace dotnetnewmvc
         public static void Main(string[] args)
         {
             DeviceListener();
-            CreateHostBuilders(args).Build().Run();
+            CreateHostBuilderr(args).Build().Run();
         }
 
         public static async void DeviceListener()
